@@ -1,7 +1,22 @@
-# Getting Started with Create React App
-
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Pour que l'appli fonctionne, il faut d'abord installer plusieurs modules
+npm install react-icons --save  
+npm i bootstrap  
+npm install react-bootstrap bootstrap  
+npm i react-diff-viewer  
+npm install react-router-dom  
 
+## Pour créer une nouvelle Release
+history | grep "git flow" ou regarder sur github "yvandouenel Merge branch 'release/0.1.10'"
+git flow release start 0.1.x
+git flow release finish '0.1.x'
+git push
+git push origin master
+
+## LESS / CSS
+Pour compiler le code css :
+cd src/less/
+less-watch-compiler . ../css style.less
 ## Available Scripts
 
 In the project directory, you can run:

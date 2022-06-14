@@ -1,0 +1,373 @@
+/* Media queries */
+@media (min-width: 1500px) {
+  .container {
+    max-width: 1440px !important;
+  }
+}
+@media (min-width: 1800px) {
+  .container {
+    max-width: 1740px !important;
+  }
+}
+/* general */
+.display-none {
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+  z-index: -1000;
+}
+.right {
+  float: right !important;
+  margin-left: 20px;
+}
+.left {
+  float: left !important;
+  margin-right: 20px;
+}
+/* nav ****************************************/
+nav {
+  z-index: 1;
+}
+/* icons **************************************/
+.arrow {
+  font-size: 2em;
+}
+.arrow:hover {
+  cursor: pointer;
+}
+.arrow svg {
+  vertical-align: top !important;
+}
+.icon-click:hover {
+  cursor: pointer;
+}
+/* propriétés de boîte ************************/
+.pl-50 {
+  padding-left: 50px;
+}
+/* Header *************************************/
+#main-header {
+  display: flex;
+  justify-content: center;
+}
+#main-header h1 {
+  max-width: 50%;
+}
+#main-header h1 #m-memo {
+  position: relative;
+  top: 6px;
+}
+#main-header h2 {
+  font-size: 0.875rem;
+}
+#main-header #icon-user {
+  margin-left: 50px;
+  color: white;
+  font-size: 2em;
+  margin-top: 10px;
+}
+/* formulaire de connexion ********************/
+#login-form {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+@media screen and (max-width: 768px) {
+  #login-form {
+    flex-direction: column;
+    margin-top: 40px;
+  }
+  #login-form .label-login-form {
+    display: flex;
+  }
+  #login-form .label-login-form > * {
+    flex-basis: 0;
+    flex-shrink: 1;
+    flex-grow: 1;
+    margin: 3px 0 !important;
+  }
+  #login-form .label-login-form > input {
+    border: 1px solid black;
+  }
+}
+/* Formulaire de modification / ajout de carte*/
+#add-or-edit-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#add-or-edit-card .div-label-form label {
+  display: flex;
+  flex-direction: row;
+}
+#add-or-edit-card input,
+#add-or-edit-card textarea {
+  width: 80%;
+}
+#add-or-edit-card .button-normal-size {
+  max-width: 50%;
+  margin: 0 auto;
+}
+#add-or-edit-card #section-terms {
+  display: flex;
+  justify-content: center;
+}
+/* Termes des thématiques *********************/
+@media screen and (max-width: 768px) {
+  input#add-term {
+    width: 120px;
+  }
+}
+.carte {
+  min-height: 40px;
+}
+.carte.copied {
+  border: 1px solid #dc3545;
+  position: relative;
+}
+.carte.copied:before {
+  content: "copié";
+  color: #dc3545;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 3px 40px;
+  display: block;
+  transform: rotate(30deg);
+  position: absolute;
+  top: 0;
+  right: -20px;
+}
+.carte .card-question:hover {
+  cursor: pointer;
+}
+.section-cards {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: nowrap !important;
+}
+.section-cards > .section-card {
+  flex-basis: 0px;
+  flex-grow: 1;
+  margin: 0 10px;
+  flex-shrink: 1;
+}
+@media screen and (max-width: 768px) {
+  .section-cards > .section-card {
+    width: 100vw;
+    min-width: 93vw;
+  }
+}
+@media screen and (max-width: 768px) {
+  .section-cards {
+    width: 95vw;
+    min-width: 95vw;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}
+table[class*="-split-view"] tr[class*="css-"] td[class*="-gutter"] {
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+  z-index: -1000;
+}
+table[class*="-split-view"] tr[class*="css-"] td[class*="-marker"] {
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+  z-index: -1000;
+}
+.css-h84nzi-line-number {
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+  z-index: -1000;
+}
+td[class*="-content"]:nth-child(2n+1) {
+  background: #e6ffed;
+}
+td[class*="-content"]:nth-child(2n) {
+  /* :first-of-type */
+  background: #ffeef0;
+}
+span[class*="-word-added"] {
+  background-color: red;
+  color: white;
+}
+span[class*="-word-removed"] {
+  background-color: green;
+  color: white;
+}
+.info-reponse a {
+  color: white;
+  text-decoration: underline;
+}
+.info-reponse a:hover {
+  color: black;
+  text-decoration: underline;
+}
+.label-large > div {
+  min-width: 100px;
+}
+#section-terms {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+form#edit-term {
+  margin: 8px 0 0 0;
+  padding: 0;
+}
+.term-div {
+  position: relative;
+  display: flex;
+}
+.term-div div.btn-secondary > a {
+  color: white;
+}
+.term-div .parameter-div {
+  position: absolute;
+  top: 85%;
+  left: 0;
+  border-radius: 8px;
+  background-color: #535a62;
+  color: whitesmoke;
+  padding: 10px;
+  min-width: 100%;
+}
+.term-div .parameter-div ul > li {
+  white-space: no-wrap;
+}
+/* Menu déroulant */
+#section-terms {
+  position: relative;
+}
+#section-terms .icon.checkbox .center-checkbox {
+  fill: white;
+}
+#section-terms .icon.checkbox:hover .center-checkbox {
+  fill: green;
+}
+#section-terms .icon:hover {
+  cursor: pointer;
+}
+#section-terms form.submenu label {
+  background-color: white;
+}
+#section-terms .selected-link {
+  border-bottom: 3px dashed #28a745;
+  font-weight: bold;
+  opacity: 1;
+}
+#section-terms .ul-nested-dropdown {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+@media screen and (max-width: 980px) {
+  #section-terms .ul-nested-dropdown {
+    flex-wrap: wrap;
+  }
+  #section-terms .ul-nested-dropdown > li > a {
+    display: block;
+  }
+  #section-terms .ul-nested-dropdown > li ul {
+    display: flex;
+  }
+  #section-terms .ul-nested-dropdown > li ul li {
+    flex-basis: auto !important;
+  }
+}
+#section-terms .ul-nested-dropdown > li ul {
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+#section-terms .ul-nested-dropdown > li.not-selected ul {
+  display: none;
+}
+#section-terms .ul-nested-dropdown > li.selected.closed ul {
+  display: none;
+}
+#section-terms .ul-nested-dropdown > li.selected > a {
+  background-color: #28a745;
+}
+#section-terms .ul-nested-dropdown > li > ul {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background-color: rgba(107, 115, 125, 0.95);
+  border: 5px solid white;
+  border-radius: 8px;
+  padding: 20px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+#section-terms .ul-nested-dropdown > li > ul a {
+  color: white;
+  padding: 3px;
+}
+#section-terms .ul-nested-dropdown > li > ul a:hover {
+  text-decoration: none;
+  background-color: transparent;
+}
+#section-terms .ul-nested-dropdown > li > ul > li {
+  flex-basis: 0;
+  font-size: 1.5rem;
+  padding: 20px 0;
+}
+#section-terms .ul-nested-dropdown > li > ul > li > div {
+  border-left: 1px solid white;
+}
+#section-terms .ul-nested-dropdown > li > ul > li.selected > a {
+  border-bottom: 3px dashed #28a745;
+  font-weight: bold;
+  opacity: 1;
+}
+#section-terms .ul-nested-dropdown > li > ul > li li {
+  font-size: 0.95em;
+  padding-left: 10px;
+}
+#section-terms .ul-nested-dropdown > li > ul > li li.selected > a {
+  border-bottom: 3px dashed #28a745;
+  font-weight: bold;
+  opacity: 1;
+}
+#section-terms .ul-nested-dropdown > li > ul > li a.btn-secondary {
+  white-space: nowrap;
+}
+#section-terms .ul-nested-dropdown li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+#section-terms .ul-nested-dropdown li.has-children > a:after {
+  content: " > ";
+}
+/* Listes des termes pour y placer un sous-terme ou une carte */
+.list-group-terms:hover {
+  cursor: pointer;
+}
