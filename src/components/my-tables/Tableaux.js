@@ -436,20 +436,20 @@ class Tableaux extends Component {
     });
   };
   renderFormAddOrEditCard = () => {
-    /*     console.log("Dans renderFormAddOrEditCard");
-        console.log(this.state.editingACard); */
+    console.log("Dans renderFormAddOrEditCard");
+    /* console.log(this.state.editingACard); */
     if (this.state.addingACard || this.state.editingACard) {
       let edit = this.state.editingACard ? this.editedCard : false;
-      console.log(
+      /* console.log(
         "addingACard = ",
         this.state.addingACard,
         "editingACard = ",
         this.state.editingACard,
         "theme = " + this.themeId
-      );
+      ); */
       return (
         <Modal
-          show={this.render_modal_add_edit_card}
+          show={true}
           onHide={this.handleCloseForm}
           size="lg"
           className="modal-large"
@@ -457,7 +457,7 @@ class Tableaux extends Component {
           <Modal.Header className="d-flex justify-content-between">
             <Modal.Title>Gérer la carte</Modal.Title>
             <AiOutlineClose className="icon-click"
-            onClick={e => this.handleCloseForm()}
+              onClick={e => this.handleCloseForm()}
             />
           </Modal.Header>
           <Modal.Body>
@@ -551,7 +551,7 @@ class Tableaux extends Component {
                     className="btn btn-default btn-success button-normal-size"
                   >
                     Envoyer
-                </button>
+                  </button>
                 </form>
               </>
             }
@@ -574,7 +574,7 @@ class Tableaux extends Component {
                 Supprimer la Supprimer la carte
               </Button>
             )}
-            
+
           </Modal.Footer>
         </Modal>
       );
@@ -819,20 +819,20 @@ class Tableaux extends Component {
               return term.name === this.editedCard.name ? (
                 ""
               ) : (
-                  <li
-                    key={term.id}
-                    title={`Cliquer pour déplacer la carte en cours vers la rubrique ${term.name}`}
-                    className="list-group-item"
-                    onClick={e =>
-                      this.handleSubmitAddOrEditCard(e, this.editedCard, term)
-                    }
-                  >
-                    {term.name}
-                    {term.hasOwnProperty("children") &&
-                      this.renderNestedTermList(term.children, this.editedCardIndexes)
-                    }
-                  </li>
-                );
+                <li
+                  key={term.id}
+                  title={`Cliquer pour déplacer la carte en cours vers la rubrique ${term.name}`}
+                  className="list-group-item"
+                  onClick={e =>
+                    this.handleSubmitAddOrEditCard(e, this.editedCard, term)
+                  }
+                >
+                  {term.name}
+                  {term.hasOwnProperty("children") &&
+                    this.renderNestedTermList(term.children, this.editedCardIndexes)
+                  }
+                </li>
+              );
             })}
           </ul>
         </>
@@ -913,7 +913,7 @@ class Tableaux extends Component {
       );
     }
   };
-  
+
   renderFooter = () => {
     return (
       <div className="bg-secondary">
