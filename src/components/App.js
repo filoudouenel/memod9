@@ -6,6 +6,7 @@ import Coopernet from "../services/Coopernet";
 import About from './About';
 import FormLogin from './FormLogin';
 import Tableaux from "./my-tables/Tableaux";
+import OthersTables from './others-tables/OthersTables';
 
 class App extends Component {
   state = {
@@ -71,6 +72,7 @@ class App extends Component {
             {/* de la route la plus spécifique à la plus générique */}
             <Route path="/about" element={<About />} />
             <Route path="/my-tables" element={<Tableaux coopernet={this.state.coopernet} userIsLogged={this.state.is_logged_in} />} />
+            <Route path="/others-tables" element={<OthersTables coopernet={this.state.coopernet} userIsLogged={this.state.is_logged_in} />} />
             <Route path="/" element={!this.state.is_logged_in ? (
               <FormLogin handleSubmitFormLogin={this.handleSubmitFormLogin} />
             ) : (
