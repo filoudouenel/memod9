@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Redirect, Link } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import NestedDropdown from './NestedDropdown';
 import Colonne from './Colonne';
 import Modal from "react-bootstrap/Modal";
@@ -318,19 +318,6 @@ class OthersTables extends Component {
       );
     }
   };
-  renderFooter = () => {
-    return (
-      <div className="bg-secondary">
-        <footer className=" container" id="main-footer">
-          <div className="row">
-            <div className="col d-flex justify-content-center">
-              <Link className="text-light m-2" to="/my-tables">Mes cartes</Link>
-            </div>
-          </div>
-        </footer>
-      </div>
-    );
-  }
   renderFormMovingCard = () => {
     console.log("Dans renderFormMovingCard. Edited Card : ", this.state.editingACard);
     if (this.state.editingACard) {
@@ -379,20 +366,20 @@ class OthersTables extends Component {
               return term.name === this.editedCard.name ? (
                 ""
               ) : (
-                  <li
-                    key={term.id}
-                    title={`Cliquer pour copier la carte en cours vers la rubrique ${term.name}`}
-                    className="list-group-item"
-                    onClick={e =>
-                      this.handleClickCopyCard(e, this.editedCard, term)
-                    }
-                  >
-                    {term.name}
-                    {term.hasOwnProperty("children") &&
-                      this.renderNestedTermList(term.children, this.editedCardIndexes)
-                    }
-                  </li>
-                );
+                <li
+                  key={term.id}
+                  title={`Cliquer pour copier la carte en cours vers la rubrique ${term.name}`}
+                  className="list-group-item"
+                  onClick={e =>
+                    this.handleClickCopyCard(e, this.editedCard, term)
+                  }
+                >
+                  {term.name}
+                  {term.hasOwnProperty("children") &&
+                    this.renderNestedTermList(term.children, this.editedCardIndexes)
+                  }
+                </li>
+              );
             })}
           </ul>
         </>
@@ -432,9 +419,9 @@ class OthersTables extends Component {
             onClick={this.handleClickShowUsers}
             className="btn btn-primary">
             <FiUserPlus className="m-2 h4" />
-          Voir les autres utilisateurs
+            Voir les autres utilisateurs
 
-        </button>
+          </button>
         </div>
       )
     } else {
@@ -446,22 +433,24 @@ class OthersTables extends Component {
                 onClick={this.handleClickHideUsers}
                 className="btn btn-primary">
                 <FiUserMinus className="m-2 h4" />
-            Cacher les utilisateurs
-          </button>
+                Cacher les utilisateurs
+              </button>
             </div>
           )}
-          <h2>Les autres utilisateurs</h2>
-          <form
-            onSubmit={this.handleSubmitFilterByName}>
-            <label htmlFor="filter-uname">Filtrer par nom &nbsp; &nbsp;</label>
-            <input type="text"
-              id="filter-uname"
-              onChange={this.handleChangeFilterByName}
-              value={this.state.filter_name}
-              autoFocus
-            />
+          <div className="title-form-others mt-4 mb-4 d-flex align-items-center">
+            <h2 className='me-4'>Les autres utilisateurs</h2>
+            <form
+              onSubmit={this.handleSubmitFilterByName}>
+              <label htmlFor="filter-uname">Filtrer par nom &nbsp; &nbsp;</label>
+              <input type="text"
+                id="filter-uname"
+                onChange={this.handleChangeFilterByName}
+                value={this.state.filter_name}
+                autoFocus
+              />
 
-          </form>
+            </form>
+          </div>
 
           <ul className="list-unstyled d-flex flex-wrap" id="ul-users-button">
             {
@@ -484,9 +473,9 @@ class OthersTables extends Component {
                 onClick={this.handleClickHideUsers}
                 className="btn btn-primary">
                 <FiUserMinus className="m-2 h4" />
-            Cacher les utilisateurs
+                Cacher les utilisateurs
 
-          </button>
+              </button>
             </div>
           )}
         </section>
@@ -523,11 +512,11 @@ class OthersTables extends Component {
     return (
       <div>
         <main className="container">
-          {!this.state.userIsLogged && (<Redirect to={"/"} />)}
+          {!this.state.userIsLogged && (<Navigate to="/" />)}
 
           <div className="row">
             <div className="col others-users-div">
-              { !!this.state.users.length && (this.renderUsers())}
+              {!!this.state.users.length && (this.renderUsers())}
             </div>
           </div>
           <div className="row">
@@ -550,7 +539,7 @@ class OthersTables extends Component {
             </div>
           </div>
         </main>
-        {this.renderFooter()}
+
       </div>
     );
   }
