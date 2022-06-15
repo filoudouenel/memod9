@@ -914,19 +914,7 @@ class Tableaux extends Component {
     }
   };
 
-  renderFooter = () => {
-    return (
-      <div className="bg-secondary">
-        <footer className=" container" id="main-footer">
-          <div className="row">
-            <div className="col d-flex justify-content-center">
-              <Link className="text-light m-2" to="/others-tables">Les cartes des autres</Link>
-            </div>
-          </div>
-        </footer>
-      </div>
-    );
-  }
+  
   changeStateReponse = (e, card, column) => {
     /* console.log("dans changeStateReponse");
     console.log("Theme : " + this.themeId);
@@ -965,7 +953,6 @@ class Tableaux extends Component {
           )}
           {this.renderColumn()}
         </div>
-        {this.state.userIsLogged && this.renderFooter()}
       </div>
     );
   }
