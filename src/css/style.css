@@ -371,3 +371,12 @@ form#edit-term {
 .list-group-terms:hover {
   cursor: pointer;
 }
+
+/* Textes */
+.about p {
+  line-height: 2rem;
+  font-size: 1.4rem;
+}
+.grey-light {
+  color: #777777;
+}
