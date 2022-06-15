@@ -372,6 +372,11 @@ form#edit-term {
   cursor: pointer;
 }
 
+/* Les noms des autres */
+#ul-users-button > li{
+  margin: 5px;
+}
+
 /* Textes */
 .about p {
   line-height: 2rem;
