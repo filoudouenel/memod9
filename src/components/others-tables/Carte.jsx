@@ -186,7 +186,7 @@ class Carte extends Component {
               className="content info-reponse mb-4 ml-2"
               dangerouslySetInnerHTML={{ __html: this.props.card.explication }}
             ></div>
-            {this.dumpPronounciation()}
+            
            
           </div>
         )}
