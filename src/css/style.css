@@ -373,6 +373,10 @@ form#edit-term {
 }
 
 /* Les noms des autres */
+#ul-users-button {
+  margin: 0 -15px;
+  margin: 0 -15px;
+}
 #ul-users-button > li{
   margin: 5px;
 }
