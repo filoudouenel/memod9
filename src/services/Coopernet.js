@@ -300,7 +300,7 @@ class Coopernet {
         ptid = 0
     ) => {
         console.log("Dans createReqAddOrEditTerm de coopernet, envoie du label : ", label);
-        console.log("ptid : ", ptid);
+        //console.log("ptid : ", ptid);
         // création de la requête
         // utilisation de fetch
         fetch(this.url_server + "memo/term?_format=hal_json", {
