@@ -4,41 +4,41 @@ import Button from "react-bootstrap/Button";
 import { IoIosArrowDropright, IoIosArrowDropleft } from "react-icons/io";
 import Diff from "./Diff";
 
-class Carte extends Component {
+class Card extends Component {
   state = {
-    suggesting_a_reponse: false,
-    suggested_reponse: "",
+    suggesting_a_answer: false,
+    suggested_answer: "",
     card_pronunciation: null
   };
   vc = null;
-  changeStateSuggestionAReponse = e => {
-    console.log("dans changeStateSuggestionAReponse");
+  changeStateSuggestionAAnswer = e => {
+    console.log("dans changeStateSuggestionAAnswer");
     const state = { ...this.state };
-    state.suggesting_a_reponse = true;
+    state.suggesting_a_answer = true;
     this.setState(state);
   };
   handleCloseForm = event => {
     console.log("dans handleCloseForm");
     const state = { ...this.state };
-    state.suggesting_a_reponse = false;
-    state.suggested_reponse = "";
+    state.suggesting_a_answer = false;
+    state.suggested_answer = "";
     this.setState(state);
   };
-  handleSubmitSuggestReponse = event => {
-    console.log("dans handleSubmitSuggestReponse");
+  handleSubmitSuggestAnswer = event => {
+    console.log("dans handleSubmitSuggestAnswer");
     event.preventDefault();
     const state = { ...this.state };
-    state.suggested_reponse = document.querySelector(
-      "#inputsuggestreponse"
+    state.suggested_answer = document.querySelector(
+      "#inputsuggestanswer"
     ).value;
     this.setState(state);
   };
-  handleLoadFormSuggestReponse = event => {
-    console.log("dans handleLoadFormSuggestReponse");
+  handleLoadFormSuggestAnswer = event => {
+    console.log("dans handleLoadFormSuggestAnswer");
   };
-  dumpCompareReponse = () => {
-    if (this.state.suggested_reponse !== "") {
-      if (this.props.card.reponse === this.state.suggested_reponse) {
+  dumpCompareAnswer = () => {
+    if (this.state.suggested_answer !== "") {
+      if (this.props.card.answer === this.state.suggested_answer) {
         return (
           <div className="alert-success mt-3 mb-3 p-2">Réponse parfaite !</div>
         );
@@ -46,8 +46,8 @@ class Carte extends Component {
         return (
           <div>
             <Diff
-              ancien={this.props.card.reponse}
-              nouveau={this.state.suggested_reponse}
+              ancien={this.props.card.answer}
+              nouveau={this.state.suggested_answer}
               splitView={true}
             />
           </div>
@@ -57,12 +57,12 @@ class Carte extends Component {
   dumpFormAnswerSuggest = event => {
     console.log("dans dumpFormAnswerSuggest");
 
-    if (this.state.suggesting_a_reponse) {
+    if (this.state.suggesting_a_answer) {
       window.setTimeout(function () {
-        const input_suggest_reponse = document.querySelector(
-          "#inputsuggestreponse"
+        const input_suggest_answer = document.querySelector(
+          "#inputsuggestanswer"
         );
-        if (input_suggest_reponse) input_suggest_reponse.focus();
+        if (input_suggest_answer) input_suggest_answer.focus();
       }, 500);
       return (
         <Modal show={true} size="lg" className="modal-large">
@@ -73,12 +73,12 @@ class Carte extends Component {
             <h4 className="card-question">{this.props.card.question}</h4>
             {/* formulaire ici */}
             <form
-              id="suggest-reponse"
+              id="suggest-answer"
               onSubmit={e => {
-                this.handleSubmitSuggestReponse(e);
+                this.handleSubmitSuggestAnswer(e);
               }}
             >
-              <div id="div-reponse" className="div-label-form">
+              <div id="div-answer" className="div-label-form">
                 <label className="w-100">
                   <div>Réponse :</div>
 
@@ -86,7 +86,7 @@ class Carte extends Component {
                     type="text"
                     autoFocus
                     className="w-100"
-                    id="inputsuggestreponse"
+                    id="inputsuggestanswer"
                   />
                 </label>
               </div>
@@ -98,7 +98,7 @@ class Carte extends Component {
                 Comparer
               </button>
             </form>
-            {this.dumpCompareReponse()}
+            {this.dumpCompareAnswer()}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="primary" onClick={e => this.handleCloseForm()}>
@@ -124,16 +124,16 @@ class Carte extends Component {
   render() {
     return (
       <article
-        className="bg-secondary text-light p-2 mb-2 mt-4 rounded carte d-flex justify-content-between"
+        className="bg-secondary text-light p-2 mb-2 mt-4 rounded card d-flex justify-content-between"
         id={this.props.card.id}
       >
         <div
           className="me-2 cursor-pointer arrow"
-          title="Déplacer la carte"
+          title="Déplacer la card"
         >
           <IoIosArrowDropleft
             onClick={() =>
-              this.props.onMoveCard(this.props.card, this.props.colonne, "left")
+              this.props.onMoveCard(this.props.card, this.props.column, "left")
             }
           />
         </div>
@@ -142,16 +142,16 @@ class Carte extends Component {
             className="card-question"
             title="Voir la réponse"
             onClick={e => {
-              this.props.onShowReponse(e, this.props.card, this.props.colonne);
+              this.props.onShowAnswer(e, this.props.card, this.props.column);
             }}
           >
             {this.props.card.question}
           </h4>
           <div className="text-center d-flex justify-content-around align-items-center">
-            {this.props.card.reponse && (
+            {this.props.card.answer && (
               <button
                 className="btn mb-2 mt-2 btn-warning"
-                onClick={e => this.changeStateSuggestionAReponse(e)}
+                onClick={e => this.changeStateSuggestionAAnswer(e)}
               >
                 Proposer une réponse
               </button>
@@ -163,7 +163,7 @@ class Carte extends Component {
                 this.props.onClickEditCard(
                   e,
                   this.props.card,
-                  this.props.colonne,
+                  this.props.column,
                   this.props.col_index,
                   this.props.card_index
                 );
@@ -181,15 +181,15 @@ class Carte extends Component {
             </svg>
           </div>
 
-          {this.props.show_reponse && (
+          {this.props.show_answer && (
             <div>
-              <h3 className="panel-footer reponse border-left border-success m-2 p-2">
-                {this.props.reponse_html && <div>this.props.card.reponse</div>}
-                {!this.props.reponse_html && this.props.card.reponse}
+              <h3 className="panel-footer answer border-left border-success m-2 p-2">
+                {this.props.answer_html && <div>this.props.card.answer</div>}
+                {!this.props.answer_html && this.props.card.answer}
               </h3>
               <div
-                className="content info-reponse mb-4 ml-2"
-                dangerouslySetInnerHTML={{ __html: this.props.card.explication }}
+                className="content info-answer mb-4 ml-2"
+                dangerouslySetInnerHTML={{ __html: this.props.card.explanation }}
               ></div>
 
             </div>
@@ -199,13 +199,13 @@ class Carte extends Component {
         
         <div
           className="float-right cursor-pointer arrow"
-          title="Déplacer la carte"
+          title="Déplacer la card"
         >
           <IoIosArrowDropright
             onClick={() =>
               this.props.onMoveCard(
                 this.props.card,
-                this.props.colonne,
+                this.props.column,
                 "right"
               )
             }
@@ -217,4 +217,4 @@ class Carte extends Component {
   }
 }
 
-export default Carte;
+export default Card;

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import Carte from "./Carte";
+import Card from "./Card";
 
-class Colonne extends Component {
+class Column extends Component {
   state = {};
   render() {
     return (
@@ -11,14 +11,14 @@ class Colonne extends Component {
         </h3>
         {this.props.cards.map((card, index) => {
           return (
-            <Carte
+            <Card
               key={card.id}
               card={card}
-              colonne={this.props.colonne}
-              onShowReponse={this.props.onShowReponse}
+              column={this.props.column}
+              onShowAnswer={this.props.onShowAnswer}
               onMoveCard={this.props.onMoveCard}
               onClickEditCard={this.props.onClickEditCard}
-              show_reponse={card.show_reponse}
+              show_answer={card.show_answer}
               user={this.props.user}
               col_index={this.props.col_index}
               card_index={index}
@@ -31,4 +31,4 @@ class Colonne extends Component {
   }
 }
 
-export default Colonne;
+export default Column;

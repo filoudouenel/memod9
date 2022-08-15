@@ -56,7 +56,7 @@ class Term extends Component {
   dumpTermModal = (indexes) => {
     //console.log("Dans dumpTermModal. Indexes : ", indexes);
     if (this.state.open_parameter) {
-      const nb_cards = document.querySelectorAll("article.carte").length;
+      const nb_cards = document.querySelectorAll("article.card").length;
       return (
         <Modal
           show={this.state.open_parameter}
@@ -77,7 +77,7 @@ class Term extends Component {
 
               {(nb_cards > 0) && (
                 <span className="ml-2 alert alert-warning">
-                  suppression impossible tant que des cartes sont attachées à ce
+                  suppression impossible tant que des cards sont attachées à ce
                   terme.
                 </span>
               )}

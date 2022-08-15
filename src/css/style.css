@@ -96,7 +96,7 @@ nav {
     border: 1px solid black;
   }
 }
-/* Formulaire de modification / ajout de carte*/
+/* Formulaire de modification / ajout de card*/
 #add-or-edit-card {
   display: flex;
   flex-direction: column;
@@ -124,14 +124,14 @@ nav {
     width: 120px;
   }
 }
-.carte {
+.card {
   min-height: 40px;
 }
-.carte.copied {
+.card.copied {
   border: 1px solid #dc3545;
   position: relative;
 }
-.carte.copied:before {
+.card.copied:before {
   content: "copié";
   color: #dc3545;
   background-color: rgba(255, 255, 255, 0.8);
@@ -142,7 +142,7 @@ nav {
   top: 0;
   right: -20px;
 }
-.carte .card-question:hover {
+.card .card-question:hover {
   cursor: pointer;
 }
 .section-cards {
@@ -218,11 +218,11 @@ span[class*="-word-removed"] {
   background-color: green;
   color: white;
 }
-.info-reponse a {
+.info-answer a {
   color: white;
   text-decoration: underline;
 }
-.info-reponse a:hover {
+.info-answer a:hover {
   color: black;
   text-decoration: underline;
 }
@@ -367,7 +367,7 @@ form#edit-term {
 #section-terms .ul-nested-dropdown li.has-children > a:after {
   content: " > ";
 }
-/* Listes des termes pour y placer un sous-terme ou une carte */
+/* Listes des termes pour y placer un sous-terme ou une card */
 .list-group-terms:hover {
   cursor: pointer;
 }
