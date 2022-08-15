@@ -2,8 +2,8 @@ class Coopernet {
     constructor() {
         this.state = {};
         //this.url_server = "http://local.d8-json.my/";
-        this.url_server = "https://www.coopernet.fr/";
-        //this.url_server = "http://local.coopernet.my/";
+        //this.url_server = "https://www.coopernet.fr/";
+        this.url_server = "http://local.coopernet.my/";
         //this.url_server = "http://dev.coopernet.fr/";
         this.token = "";
         this.user = {
@@ -370,7 +370,7 @@ class Coopernet {
         uid = this.user.uid
     ) => {
         // création de la requête
-        //console.log("Dans createReqCards de coopernet. termNumber : ", termNumber);
+        console.log("?????????????????????????????Dans createReqCards de coopernet. termNumber, uid : ", termNumber, this.user.uid);
         //console.log("token : ", this.token);
         const req_cards = new XMLHttpRequest();
         req_cards.onload = () => {
@@ -392,9 +392,7 @@ class Coopernet {
             "memo/list_cartes_term/" +
             uid +
             "/" +
-            termNumber +
-            "&_format=json&time=" +
-            Math.floor(Math.random() * 10000),
+            termNumber,
             true
         );
         req_cards.setRequestHeader(
@@ -476,26 +474,26 @@ class Coopernet {
             credentials: "same-origin",
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
-              "X-CSRF-Token": this.token
+                "Content-Type": "application/json",
+                "X-CSRF-Token": this.token
             },
             body: JSON.stringify({
-              name: login,
-              pass: pwd
+                name: login,
+                pass: pwd
             })
-          })
+        })
             .then(response => response.json())
             .then(data => {
-              //console.log("success", data);
-              if (data.current_user === undefined) {
-                console.log("Erreur de login");
-                throw new Error("Erreur de data : ", data);
-              } else {
-                //console.log("user", data.current_user);
-                this.user.uid = data.current_user.uid;
-                this.user.uname = data.current_user.name;
-                this.user.upwd = pwd; 
-              }
+                //console.log("success", data);
+                if (data.current_user === undefined) {
+                    console.log("Erreur de login");
+                    throw new Error("Erreur de data : ", data);
+                } else {
+                    //console.log("user", data.current_user);
+                    this.user.uid = data.current_user.uid;
+                    this.user.uname = data.current_user.name;
+                    this.user.upwd = pwd;
+                }
             })
     }
     /**
@@ -631,6 +629,35 @@ class Coopernet {
             console.log("Statut d'erreur : ", req.status, req.statusText);
             callbackFailed();
         }
+    };
+
+    getTasks = () => {
+        console.log(`dans getTasks`);
+        return fetch(
+            this.url_server + "tasks/list_tasks/",
+            {
+                credentials: "same-origin",
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/hal+json",
+                    "X-CSRF-Token": this.token,
+                    Authorization: "Basic " + btoa(this.uname + ":" + this.upwd), // btoa = encodage en base 64
+                },
+            }
+        )
+            .then((response) => {
+                console.log("data reçues dans getTasks avant json() :", response);
+                if (response.status === 200) return response.json();
+                else throw new Error("Problème de réponse ", response);
+            })
+            .then((data) => {
+                console.log("Data dans getTasks : ", data);
+
+            })
+            .catch((error) => {
+                console.log("Erreur attrapée dans getTasks", error);
+
+            });
     };
 }
 export default Coopernet;
