@@ -31,10 +31,15 @@ class Tableaux extends Component {
     this.editedCardIndexes = null;
     this.timeoutChangeTermID = null;
   }
-  componentDidMount() {
-    // création de la requête pour obtenir les thématiques
-    console.log('Dans componentDidMount de Tableaux : ', this.state.coopernet);
-    this.state.coopernet.getTerms(this.successTerms, this.failedTerms);
+  async componentDidMount() {
+    try {
+      // création de la requête pour obtenir les thématiques
+      console.log('Dans componentDidMount de Tableaux : ', this.state.coopernet);
+      this.state.coopernet.getTerms(this.successTerms, this.failedTerms);
+
+    } catch (error) {
+      console.error(`Erreur attrapée dans componentDidMount ` + error);
+    }
   }
   unlog = () => {
     console.log("Dans unlog");
@@ -914,7 +919,7 @@ class Tableaux extends Component {
     }
   };
 
-  
+
   changeStateReponse = (e, card, column) => {
     /* console.log("dans changeStateReponse");
     console.log("Theme : " + this.themeId);
