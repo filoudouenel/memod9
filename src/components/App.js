@@ -54,9 +54,20 @@ class App extends Component {
       <div className="App">
         <header className="bg-secondary" id="main-header">
 
-          <h1 id="title-memo" className="text-light">
-            <Link className="text-light m-2" to="/my-tables"><GiBrainTentacle className="icon-logo" /></Link>e<span id="m-memo">M</span>o
-          </h1>
+          <div className='container '>
+            <div className="row align-items-center">
+              <div className="col"></div>
+
+              <div className="col d-flex justify-content-center">
+                <h1 id="title-memo" className="text-light">
+                  <Link className="text-light m-2" to="/my-tables"><GiBrainTentacle className="icon-logo" /></Link>e<span id="m-memo">M</span>o
+                </h1>
+              </div>
+              <div className="col text-light">
+                {this.state.coopernet.url_server == 'https://coopernet.fr/' ? "" : this.state.coopernet.url_server}
+              </div>
+            </div>
+          </div>
 
 
         </header>

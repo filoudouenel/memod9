@@ -1,10 +1,8 @@
 class Coopernet {
     constructor() {
         this.state = {};
-        //this.url_server = "http://local.d8-json.my/";
         //this.url_server = "https://www.coopernet.fr/";
-        this.url_server = "http://local.coopernet.my/";
-        //this.url_server = "http://dev.coopernet.fr/";
+        this.url_server = (process.env.NODE_ENV == 'development') ? 'http://local.coopernet.my/' : 'https://coopernet.fr/';
         this.token = "";
         this.user = {
             uid: 0,
