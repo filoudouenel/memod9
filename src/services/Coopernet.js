@@ -1,7 +1,6 @@
 class Coopernet {
     constructor() {
-        this.state = {};
-        //this.url_server = "https://www.coopernet.fr/";
+        //this.url_server = "https://coopernet.fr/";
         this.url_server = (process.env.NODE_ENV == 'development') ? 'http://local.coopernet.my/' : 'https://coopernet.fr/';
         this.token = "";
         this.user = {
@@ -25,7 +24,7 @@ class Coopernet {
             body: JSON.stringify({
                 _links: {
                     type: {
-                        href: this.url_server + "rest/type/node/card"
+                        href: this.url_server + "rest/type/node/carte"
                     }
                 },
 
@@ -106,7 +105,7 @@ class Coopernet {
             body: JSON.stringify({
                 _links: {
                     type: {
-                        href: this.url_server + "rest/type/node/card"
+                        href: this.url_server + "rest/type/node/carte"
                     }
                 },
                 field_card_column: [
@@ -157,7 +156,7 @@ class Coopernet {
             body: JSON.stringify({
                 _links: {
                     type: {
-                        href: this.url_server + "rest/type/node/card"
+                        href: this.url_server + "rest/type/node/carte"
                     }
                 },
                 title: [
@@ -186,7 +185,7 @@ class Coopernet {
                         url: "/taxonomy/term/" + columnid
                     }
                 ],
-                field_card_thematique: [
+                field_card_theme: [
                     {
                         target_id: themeid,
                         url: "/taxonomy/term/" + themeid
@@ -234,7 +233,7 @@ class Coopernet {
             body: JSON.stringify({
                 _links: {
                     type: {
-                        href: this.url_server + "rest/type/node/card"
+                        href: this.url_server + "rest/type/node/carte"
                     }
                 },
                 title: [
@@ -263,7 +262,7 @@ class Coopernet {
                         url: "/taxonomy/term/" + card.colonnne
                     }
                 ],
-                field_card_thematique: [
+                field_card_theme: [
                     {
                         target_id: themeid,
                         url: "/taxonomy/term/" + themeid
@@ -271,14 +270,14 @@ class Coopernet {
                 ],
                 type: [
                     {
-                        target_id: "card"
+                        target_id: "carte"
                     }
                 ]
             })
         })
             .then(response => response.json())
             .then(data => {
-                console.log("data reçues dans createReqAddCards: ", data);
+                console.log("!!!!!!!!!!!!!!!!!!!data reçues dans createReqAddCards: ", data);
                 if (data.hasOwnProperty("created") && data.created[0].value) {
                     callbackSuccess(themeid, card.id);
                 } else {
@@ -415,10 +414,10 @@ class Coopernet {
         depth,
         term_name,
         has_subterm) => {
-        //console.log("Dans getCards de coopernet. termNumber : ", termNumber);
+        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Dans getCards de coopernet. termNumber : ", termNumber, req.status);
         // On teste directement le status de notre instance de XMLHttpRequest
         if (req.status === 200) {
-            // Tout baigne, voici le contenu du token
+
             let jsonResponse = JSON.parse(req.responseText);
             // ajout de la propriété show_answer à chaque card
 
