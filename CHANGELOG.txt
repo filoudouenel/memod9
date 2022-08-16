@@ -1,0 +1,2 @@
+Memopus 1.0.0 - 2022-08-16
+Première release avec correction des propriétés de 'Card' pour les traduires en anglais + test process.env.NODE_ENV development

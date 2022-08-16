@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import NestedDropdown from './NestedDropdown';
-import Colonne from './Colonne';
+import Column from './Column';
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { FiUserMinus, FiUserPlus } from "react-icons/fi";
@@ -15,7 +15,7 @@ class OthersTables extends Component {
       users: [],
       terms: [],
       my_terms: [],
-      colonnes: [],
+      columns: [],
       other_user: null,
       show_users: true,
       editingACard: false,
@@ -92,21 +92,21 @@ class OthersTables extends Component {
       }
     });
   };
-  changeStateReponse = (e, card, column) => {
-    /* console.log("dans changeStateReponse");
+  changeStateAnswer = (e, card, column) => {
+    /* console.log("dans changeStateAnswer");
     console.log("Theme : " + this.themeId);
     console.log("card : " + card);
     console.log("column : " + column.id); */
-    // il faut maintenant changer le state de la carte en question en
-    // retrouvant l'index de la colonne en fct de l'id de la colonne
-    // puis l'index de la carte en fct de l'id de la carte
+    // il faut maintenant changer le state de la card en question en
+    // retrouvant l'index de la column en fct de l'id de la column
+    // puis l'index de la card en fct de l'id de la card
     let state = { ...this.state };
-    let colonne_index = state.colonnes.indexOf(column);
-    //console.log("Index de la colonne : " + colonne_index);
-    let carte_index = state.colonnes[colonne_index].cartes.indexOf(card);
-    //console.log("Index de la carte : " + carte_index);
-    state.colonnes[colonne_index].cartes[carte_index].show_reponse = state
-      .colonnes[colonne_index].cartes[carte_index].show_reponse
+    let column_index = state.columns.indexOf(column);
+    //console.log("Index de la column : " + column_index);
+    let card_index = state.columns[column_index].cards.indexOf(card);
+    //console.log("Index de la card : " + card_index);
+    state.columns[column_index].cards[card_index].show_answer = state
+      .columns[column_index].cards[card_index].show_answer
       ? false
       : true;
 
@@ -124,7 +124,7 @@ class OthersTables extends Component {
 
   handleClickCopyCard = (e, card, term) => {
     e.stopPropagation();
-    console.log('Dans handleClickCopyCard - carte : ', card, "terme : ", term);
+    console.log('Dans handleClickCopyCard - card : ', card, "terme : ", term);
     this.state.coopernet.createReqAddCards(
       card,
       term.id,
@@ -150,7 +150,7 @@ class OthersTables extends Component {
     const state = { ...this.state };
 
     // si on a cliqué sur un niveau 1 qui était "selected" et "close" alors
-    // on ne va pas chercher les cartes correspondantes et on se contente
+    // on ne va pas chercher les cards correspondantes et on se contente
     // de passer le terme de nivau 0 à "open"
     if ((indexes.length === 1) &&
       state.terms[indexes[0]].selected &&
@@ -175,7 +175,7 @@ class OthersTables extends Component {
     }
     else {
       console.log("#############################cas 3. Term : ",
-        term_name, " - hassubterm : ", has_subterm, "carte pour l'utilisateur : ", this.state.other_user);
+        term_name, " - hassubterm : ", has_subterm, "card pour l'utilisateur : ", this.state.other_user);
       // on gère l'état des terms (selected, open) grâce à une fonction récursive
       // à laquelle on passe par référence state.terms
       this.browseTreeToManageSelected(state.terms, indexes);
@@ -198,7 +198,7 @@ class OthersTables extends Component {
     console.log('dans handleClickName de OthersTables. User : ', o_user);
     this.state.coopernet.getTerms(this.successTerms, this.failedTerms, o_user);
     const state = { ...this.state };
-    state.colonnes = [];
+    state.columns = [];
     this.setState(state);
   }
   handleClickHideUsers = (e) => {
@@ -242,26 +242,26 @@ class OthersTables extends Component {
    */
   successGetCards = (cols, termId, depth, term_name, has_subterm) => {
     console.log("Dans successGetCards de OthersTables pour le term : ",
-      term_name, " has_subterm : ", has_subterm, "colonnes : ", cols);
-    // Des cartes sont-elles liées à cette thématique
+      term_name, " has_subterm : ", has_subterm, "columns : ", cols);
+    // Des cards sont-elles liées à cette thématique
     let term_has_cards = false;
     for (let i = 0; i < cols.length; i++) {
-      if (cols[i].cartes.length > 0) {
+      if (cols[i].cards.length > 0) {
         term_has_cards = true
         break;
       }
     }
-    // si le term cliqué n'est pas de niveau 0 sans carte et avec sous-termes
-    // ou si le term cliqué est de niveau 0 et avec cartes
+    // si le term cliqué n'est pas de niveau 0 sans card et avec sous-termes
+    // ou si le term cliqué est de niveau 0 et avec cards
     // alors on change la rubrique
     console.log("################ - depth - term_has_cards - term_name", depth, term_has_cards, term_name);
     if ((!(depth === 1 && !term_has_cards && has_subterm)) ||
       (depth === 1 && term_has_cards)) {
 
       cols.sort((a, b) => a.id - b.id);
-      console.log("Colonnes : ", cols);
+      console.log("Columns : ", cols);
       const state = { ...this.state };
-      state.colonnes = cols;
+      state.columns = cols;
 
       // on sait maintenant quel term (thématique) est affiché
       this.themeId = termId;
@@ -295,18 +295,18 @@ class OthersTables extends Component {
     console.log("Dans failedMyTerms de OthersTables");
   };
   renderColumn = () => {
-    if (this.state.colonnes.length) {
+    if (this.state.columns.length) {
       return (
         <section className="row section-cards">
-          {this.state.colonnes.map((col, index) => {
+          {this.state.columns.map((col, index) => {
             return (
-              <Colonne
+              <Column
                 key={col.id}
                 id={col.id}
-                colonne={col}
+                column={col}
                 label={col.name}
-                cards={col.cartes}
-                onShowReponse={this.changeStateReponse}
+                cards={col.cards}
+                onShowAnswer={this.changeStateAnswer}
                 user={this.state.coopernet.user}
                 col_index={index}
                 copied_cards={this.state.copied_cards}
@@ -335,7 +335,7 @@ class OthersTables extends Component {
           className="modal-large"
         >
           <Modal.Header>
-            <Modal.Title>Copier la carte dans un de mes tableaux</Modal.Title>
+            <Modal.Title>Copier la card dans un de mes tableaux</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {this.state.editingACard && (this.renderNestedTermList())}
@@ -351,12 +351,12 @@ class OthersTables extends Component {
   };
   /**
    * Affichage des termes de sous forme de liste afin de pouvoir
-   * changer de term une carte
+   * changer de term une card
    */
   renderNestedTermList = (terms = this.state.my_terms) => {
     console.log("Dans renderNestedTermList");
-    console.log("Carte modifiée : ", this.editedCard);
-    console.log("Indexes de la carte : ", this.editedCardIndexes);
+    console.log("Card modifiée : ", this.editedCard);
+    console.log("Indexes de la card : ", this.editedCardIndexes);
     if (this.editedCard) {
       return (
         <>
@@ -368,7 +368,7 @@ class OthersTables extends Component {
               ) : (
                 <li
                   key={term.id}
-                  title={`Cliquer pour copier la carte en cours vers la rubrique ${term.name}`}
+                  title={`Cliquer pour copier la card en cours vers la rubrique ${term.name}`}
                   className="list-group-item"
                   onClick={e =>
                     this.handleClickCopyCard(e, this.editedCard, term)

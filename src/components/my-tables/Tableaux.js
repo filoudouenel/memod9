@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import NestedDropdown from "./NestedDropdown";
-import Colonne from "./Colonne";
+import Column from "./Column";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { Link, Navigate } from "react-router-dom";
@@ -19,7 +19,7 @@ class Tableaux extends Component {
       addingATerm: false,
       msgError: "",
       terms: [],
-      colonnes: [], //ici sont stockées les colonnes et les cartes
+      columns: [], //ici sont stockées les columns et les cards
       need_get_terms: true,
       term_name: ""
     };
@@ -49,18 +49,18 @@ class Tableaux extends Component {
   };
 
   /**
-   * Récupère l'index de la colonne actuelle puis l'index de la colonne
+   * Récupère l'index de la column actuelle puis l'index de la column
    * précédente ou suivante puis récupère l'index du term de tanonomie
    * pour le donner en paramètre à la fonction qui est chargée de modifier
-   * la carte
+   * la card
    */
   moveCard = (card, column, direction) => {
     console.log("Dans moveCard");
     //console.log(card,column,direction);
 
-    // récupération de l'index de la colonne
-    const current_column_index = this.state.colonnes.indexOf(column);
-    console.log("index de la colonne : ", current_column_index);
+    // récupération de l'index de la column
+    const current_column_index = this.state.columns.indexOf(column);
+    console.log("index de la column : ", current_column_index);
     let new_index_drupal_column = 0;
 
     switch (direction) {
@@ -68,7 +68,7 @@ class Tableaux extends Component {
         // récupération de l'index suivant
         const next_column_index = (current_column_index + 1) % 4;
         console.log("index suivant : ", next_column_index);
-        new_index_drupal_column = this.state.colonnes[next_column_index].id;
+        new_index_drupal_column = this.state.columns[next_column_index].id;
         break;
       case "left":
         // récupération de l'index précédent
@@ -76,12 +76,12 @@ class Tableaux extends Component {
         previous_column_index =
           previous_column_index === -1 ? 3 : previous_column_index;
         console.log("index précédent : ", previous_column_index);
-        new_index_drupal_column = this.state.colonnes[previous_column_index].id;
+        new_index_drupal_column = this.state.columns[previous_column_index].id;
         break;
       default:
         console.log("Pb dans moveCard " + direction + ".");
     }
-    console.log("nouvel index de la carte : ", new_index_drupal_column);
+    console.log("nouvel index de la card : ", new_index_drupal_column);
     this.state.coopernet.createReqEditColumnCard(
       card.id,
       this.state.coopernet.user.uname,
@@ -95,7 +95,7 @@ class Tableaux extends Component {
   ;
   successEditColumnCard = themeid => {
     console.log("Dans successEditColumnCard");
-    // Rappel de la fonction qui va chercher la liste des cartes pour une thématique
+    // Rappel de la fonction qui va chercher la liste des cards pour une thématique
     this.state.coopernet.createReqCards(
       themeid,
       this.successGetCards,
@@ -109,9 +109,9 @@ class Tableaux extends Component {
   successEditCard = (themeid, reload_current_term) => {
     console.log("#############Dans successEditCard - reload_current_term : ", reload_current_term);
 
-    // Rappel de la fonction qui va chercher la liste des cartes pour
+    // Rappel de la fonction qui va chercher la liste des cards pour
     // une thématique. Si reload_current_term est vrai, on recharge
-    // le terme en cours. C'est utile dans le cas d'un déplacement de carte.
+    // le terme en cours. C'est utile dans le cas d'un déplacement de card.
     themeid = (reload_current_term) ? this.themeId : themeid;
     this.state.coopernet.createReqCards(
       themeid,
@@ -126,7 +126,7 @@ class Tableaux extends Component {
   };
   successAddCard = themeid => {
     console.log("Dans successAddCard");
-    // Rappel de la fonction qui va chercher la liste des cartes pour une thématique
+    // Rappel de la fonction qui va chercher la liste des cards pour une thématique
     this.state.coopernet.createReqCards(
       themeid,
       this.successGetCards,
@@ -159,7 +159,7 @@ class Tableaux extends Component {
     if (action_type !== "added") state.terms[term_index].selected = true;
 
     this.setState(state);
-    // création de la requête pour obtenir les cartes correspondantes à la thématique
+    // création de la requête pour obtenir les cards correspondantes à la thématique
     if (action_type === "added") this.state.coopernet.createReqCards(
       tid,
       this.successGetCards,
@@ -174,11 +174,11 @@ class Tableaux extends Component {
     console.log("Dans successRemoveCard " + this.themeId);
     // On enlève la fenêtre modal de suppression/modification
     this.render_modal_add_edit_card = false;
-    // Attention pour que l'ajout d'une carte soit à nouveau possible,
+    // Attention pour que l'ajout d'une card soit à nouveau possible,
     // il faut réinitialiser les propriétés editingACard et addingACard
     this.state.editingACard = false;
     this.state.addingACard = false;
-    // Rappel de la fonction qui va chercher la liste des cartes pour une thématique
+    // Rappel de la fonction qui va chercher la liste des cards pour une thématique
     this.state.coopernet.createReqCards(
       this.themeId,
       this.successGetCards,
@@ -193,9 +193,9 @@ class Tableaux extends Component {
     console.log("Dans successRemoveTerm ");
     // Rappel de la fonction qui va chercher la liste des terms
     this.state.coopernet.getTerms(this.successTerms, this.failedTerms);
-    // on supprime les colonnes du state
+    // on supprime les columns du state
     const state = { ...this.state };
-    state.colonnes = [];
+    state.columns = [];
     this.setState(state);
   };
   failedRemoveTerm = () => {
@@ -220,26 +220,26 @@ class Tableaux extends Component {
    */
   successGetCards = (cols, termId, depth, term_name, has_subterm) => {
     console.log("Dans successGetCards pour le term : ",
-      term_name, " has_subterm : ", has_subterm, "colonnes : ", cols);
-    // Des cartes sont-elles liées à cette thématique
+      term_name, " has_subterm : ", has_subterm, "columns : ", cols);
+    // Des cards sont-elles liées à cette thématique
     let term_has_cards = false;
     for (let i = 0; i < cols.length; i++) {
-      if (cols[i].cartes.length > 0) {
+      if (cols[i].cards.length > 0) {
         term_has_cards = true
         break;
       }
     }
-    // si le term cliqué n'est pas de niveau 0 sans carte et avec sous-termes
-    // ou si le term cliqué est de niveau 0 et avec cartes
+    // si le term cliqué n'est pas de niveau 0 sans card et avec sous-termes
+    // ou si le term cliqué est de niveau 0 et avec cards
     // alors on change la rubrique
     console.log("################ - depth - term_has_cards - term_name", depth, term_has_cards, term_name);
     if ((!(depth === 1 && !term_has_cards && has_subterm)) ||
       (depth === 1 && term_has_cards)) {
 
       cols.sort((a, b) => a.id - b.id);
-      console.log("Colonnes : ", cols);
+      console.log("Columns : ", cols);
       const state = { ...this.state };
-      state.colonnes = cols;
+      state.columns = cols;
 
       // on sait maintenant quel term (thématique) est affiché
       this.themeId = termId;
@@ -253,18 +253,18 @@ class Tableaux extends Component {
   };
 
   handleSubmitAddOrEditCard = (event, editedCard = false, new_term = null) => {
-    console.log("dans handleSubmitAddOrEditCard - carte modifiée = ", editedCard);
+    console.log("dans handleSubmitAddOrEditCard - card modifiée = ", editedCard);
 
     event.preventDefault();
     // récupération des éléments du formulaire
 
     const new_card = {
       question: document.getElementById("inputquestion").value.trim(),
-      reponse: document.getElementById("inputreponse").value.trim(),
-      explication: document.getElementById("inputexplication").value,
-      colonne: this.numCol
+      answer: document.getElementById("inputanswer").value.trim(),
+      explanation: document.getElementById("inputexplanation").value,
+      column: this.numCol
     }
-    // Ajout d'une carte si editedCard est faux
+    // Ajout d'une card si editedCard est faux
     if (!editedCard) {
       this.state.coopernet.createReqAddCards(
         new_card,
@@ -273,31 +273,31 @@ class Tableaux extends Component {
         this.failedAddCard
       );
     } else {
-      // Modification de la carte si editedCard est une carte
+      // Modification de la card si editedCard est une card
       console.log(
         "dans handleSubmitAddOrEditCard : appel de createReqEditCard"
       );
-      // Permet de gérer le changement de Terme d'une Carte
+      // Permet de gérer le changement de Terme d'une Card
       const themeId = (new_term) ? new_term.id : this.themeId;
       const reload_current_term = (new_term) ? true : false;
-      // si changement de term pour la carte, on rafraîchit le term name
+      // si changement de term pour la card, on rafraîchit le term name
 
-      // arguments num_card,login,pwd,question,reponse,themeid,columnid,callbackSuccess,callbackFailed
+      // arguments num_card,login,pwd,question,answer,themeid,columnid,callbackSuccess,callbackFailed
       /* console.log("num_card = ", editedCard.id);
       console.log("login = ", this.state.coopernet.user.uname);
       console.log("question = ", editedCard.question);
-      console.log("reponse = ", editedCard.reponse);
-      console.log("explication = ", editedCard.explication);
+      console.log("answer = ", editedCard.answer);
+      console.log("explanation = ", editedCard.explanation);
       console.log("themeid = ", themeId);
-      console.log("columnid = ", editedCard.colonne); */
+      console.log("columnid = ", editedCard.column); */
 
       // Supression des espaces en début et en fin de chaîne de caractères
       editedCard.question = editedCard.question.trim();
-      editedCard.reponse = editedCard.reponse.trim();
+      editedCard.answer = editedCard.answer.trim();
       this.state.coopernet.createReqEditCard(
         editedCard,
         themeId,
-        editedCard.colonne,
+        editedCard.column,
         this.successEditCard,
         this.failedEditCard,
         reload_current_term
@@ -341,7 +341,7 @@ class Tableaux extends Component {
     const state = { ...this.state };
 
     // si on a cliqué sur un niveau 1 qui était "selected" et "close" alors
-    // on ne va pas chercher les cartes correspondantes et on se contente
+    // on ne va pas chercher les cards correspondantes et on se contente
     // de passer le terme de nivau 0 à "open"
     if ((indexes.length === 1) &&
       state.terms[indexes[0]].selected &&
@@ -460,7 +460,7 @@ class Tableaux extends Component {
           className="modal-large"
         >
           <Modal.Header className="d-flex justify-content-between">
-            <Modal.Title>Gérer la carte</Modal.Title>
+            <Modal.Title>Gérer la card</Modal.Title>
             <AiOutlineClose className="icon-click"
               onClick={e => this.handleCloseForm()}
             />
@@ -469,7 +469,7 @@ class Tableaux extends Component {
             {
               <>
                 {/* formulaire ici */}
-                <h3>Modification de la carte</h3>
+                <h3>Modification de la card</h3>
                 <form
                   id="add-or-edit-card"
                   onSubmit={e => {
@@ -501,7 +501,7 @@ class Tableaux extends Component {
                       )}
                     </label>
                   </div>
-                  <div id="div-reponse" className="div-label-form">
+                  <div id="div-answer" className="div-label-form">
                     <label className="label-large">
                       <div>Réponse :</div>
                       {this.state.addingACard && (
@@ -509,7 +509,7 @@ class Tableaux extends Component {
                           type="text"
                           autoFocus
                           className="ml-4 textarea-large"
-                          id="inputreponse"
+                          id="inputanswer"
                         />
                       )}
                       {this.state.editingACard && (
@@ -520,13 +520,13 @@ class Tableaux extends Component {
                           type="text"
                           autoFocus
                           className="ml-4 textarea-large"
-                          id="inputreponse"
-                          value={this.editedCard.reponse}
+                          id="inputanswer"
+                          value={this.editedCard.answer}
                         />
                       )}
                     </label>
                   </div>
-                  <div id="div-explication" className="div-label-form">
+                  <div id="div-explanation" className="div-label-form">
                     <label className="label-large">
                       <div>Explication :</div>
                       {this.state.addingACard && (
@@ -534,7 +534,7 @@ class Tableaux extends Component {
                           type="text"
                           autoFocus
                           className="ml-4 textarea-large"
-                          id="inputexplication"
+                          id="inputexplanation"
                         />
                       )}
                       {this.state.editingACard && (
@@ -545,8 +545,8 @@ class Tableaux extends Component {
                           type="text"
                           autoFocus
                           className="ml-4 textarea-large"
-                          id="inputexplication"
-                          value={this.editedCard.explication}
+                          id="inputexplanation"
+                          value={this.editedCard.explanation}
                         />
                       )}
                     </label>
@@ -576,7 +576,7 @@ class Tableaux extends Component {
                 }
                 className="ml-4 bg-danger text-light "
               >
-                Supprimer la Supprimer la carte
+                Supprimer la Supprimer la card
               </Button>
             )}
 
@@ -593,17 +593,17 @@ class Tableaux extends Component {
 
     // Récupération des champs modifiés via le formulaire
     let question = document.getElementById("inputquestion").value;
-    let reponse = document.getElementById("inputreponse").value;
-    let explication = document.getElementById("inputexplication").value;
+    let answer = document.getElementById("inputanswer").value;
+    let explanation = document.getElementById("inputexplanation").value;
 
-    // récupération de l'index des colonnes
-    let index_columns = state.colonnes.indexOf(this.editedColumn);
-    // récupération de l'index des cartes
-    let index_cards = state.colonnes[index_columns].cartes.indexOf(card);
+    // récupération de l'index des columns
+    let index_columns = state.columns.indexOf(this.editedColumn);
+    // récupération de l'index des cards
+    let index_cards = state.columns[index_columns].cards.indexOf(card);
 
-    state.colonnes[index_columns].cartes[index_cards].question = question;
-    state.colonnes[index_columns].cartes[index_cards].reponse = reponse;
-    state.colonnes[index_columns].cartes[index_cards].explication = explication;
+    state.columns[index_columns].cards[index_cards].question = question;
+    state.columns[index_columns].cards[index_cards].answer = answer;
+    state.columns[index_columns].cards[index_cards].explanation = explanation;
     this.setState(state);
   };
   handleChangeTerm = (event, term, tid_parent, indexes) => {
@@ -667,7 +667,7 @@ class Tableaux extends Component {
   handleDeleteTerm = (event, term, nb_cards) => {
     console.log("Dans handleDeleteTerm");
     console.log(term);
-    if (nb_cards) console.log("Vous devez d'abord effacer toutes les cartes : ", nb_cards);
+    if (nb_cards) console.log("Vous devez d'abord effacer toutes les cards : ", nb_cards);
     else {
       this.state.coopernet.removeTerm(
         term.id,
@@ -808,17 +808,17 @@ class Tableaux extends Component {
   };
   /**
    * Affichage des termes sous forme de liste afin de pouvoir
-   * changer de term une carte
+   * changer de term une card
    */
   renderNestedTermList = (terms = this.state.terms) => {
     console.log("Dans renderNestedTermList");
-    console.log("Carte modifiée : ", this.editedCard);
-    console.log("Indexes de la carte : ", this.editedCardIndexes);
+    console.log("Card modifiée : ", this.editedCard);
+    console.log("Indexes de la card : ", this.editedCardIndexes);
     if (this.editedCard) {
       return (
         <>
           <hr />
-          <h3 className="">Déplacer la carte</h3>
+          <h3 className="">Déplacer la card</h3>
           <ul className="list-group list-group-terms">
             {terms.map(term => {
               return term.name === this.editedCard.name ? (
@@ -826,7 +826,7 @@ class Tableaux extends Component {
               ) : (
                 <li
                   key={term.id}
-                  title={`Cliquer pour déplacer la carte en cours vers la rubrique ${term.name}`}
+                  title={`Cliquer pour déplacer la card en cours vers la rubrique ${term.name}`}
                   className="list-group-item"
                   onClick={e =>
                     this.handleSubmitAddOrEditCard(e, this.editedCard, term)
@@ -879,7 +879,7 @@ class Tableaux extends Component {
   handleClickAddingACard = numCol => {
     console.log("dans handleClickAddingACard");
     console.log("dans handleClickAddingACard. render_modal_add_edit_card : ", this.render_modal_add_edit_card);
-    console.log("Numéro de colonne dans laquelle ajouter la carte : " + numCol);
+    console.log("Numéro de column dans laquelle ajouter la card : " + numCol);
     this.numCol = numCol;
     const state = { ...this.state };
     this.render_modal_add_edit_card = true;
@@ -893,21 +893,21 @@ class Tableaux extends Component {
     this.setState(state);
   };
   renderColumn = () => {
-    if (this.state.colonnes.length) {
+    if (this.state.columns.length) {
       return (
         <section className="row section-cards">
-          {this.state.colonnes.map((col, index) => {
+          {this.state.columns.map((col, index) => {
             return (
-              <Colonne
+              <Column
                 key={col.id}
                 id={col.id}
-                colonne={col}
+                column={col}
                 label={col.name}
-                cards={col.cartes}
+                cards={col.cards}
                 onClickAddCard={this.handleClickAddingACard}
                 onClickEditCard={this.handleClickEditingCard}
                 onMoveCard={this.moveCard}
-                onShowReponse={this.changeStateReponse}
+                onShowAnswer={this.changeStateAnswer}
                 user={this.state.coopernet.user}
                 col_index={index}
                 coopernet={this.props.coopernet}
@@ -920,21 +920,21 @@ class Tableaux extends Component {
   };
 
 
-  changeStateReponse = (e, card, column) => {
-    /* console.log("dans changeStateReponse");
+  changeStateAnswer = (e, card, column) => {
+    /* console.log("dans changeStateAnswer");
     console.log("Theme : " + this.themeId);
     console.log("card : " + card);
     console.log("column : " + column.id); */
-    // il faut maintenant changer le state de la carte en question en
-    // retrouvant l'index de la colonne en fct de l'id de la colonne
-    // puis l'index de la carte en fct de l'id de la carte
+    // il faut maintenant changer le state de la card en question en
+    // retrouvant l'index de la column en fct de l'id de la column
+    // puis l'index de la card en fct de l'id de la card
     let state = { ...this.state };
-    let colonne_index = state.colonnes.indexOf(column);
-    //console.log("Index de la colonne : " + colonne_index);
-    let carte_index = state.colonnes[colonne_index].cartes.indexOf(card);
-    //console.log("Index de la carte : " + carte_index);
-    state.colonnes[colonne_index].cartes[carte_index].show_reponse = state
-      .colonnes[colonne_index].cartes[carte_index].show_reponse
+    let column_index = state.columns.indexOf(column);
+    //console.log("Index de la column : " + column_index);
+    let card_index = state.columns[column_index].cards.indexOf(card);
+    //console.log("Index de la card : " + card_index);
+    state.columns[column_index].cards[card_index].show_answer = state
+      .columns[column_index].cards[card_index].show_answer
       ? false
       : true;
 

@@ -1,10 +1,8 @@
 class Coopernet {
     constructor() {
         this.state = {};
-        //this.url_server = "http://local.d8-json.my/";
         //this.url_server = "https://www.coopernet.fr/";
-        this.url_server = "http://local.coopernet.my/";
-        //this.url_server = "http://dev.coopernet.fr/";
+        this.url_server = (process.env.NODE_ENV == 'development') ? 'http://local.coopernet.my/' : 'https://coopernet.fr/';
         this.token = "";
         this.user = {
             uid: 0,
@@ -13,7 +11,7 @@ class Coopernet {
         };
     }
     removeCard = (num_card, login, pwd, callbackSuccess, callbackFailed) => {
-        console.log("dans removeCard - carte " + num_card);
+        console.log("dans removeCard - card " + num_card);
         // utilisation de fetch
         fetch(this.url_server + "node/" + num_card + "?_format=hal_json", {
             // permet d'accepter les cookies ?
@@ -27,13 +25,13 @@ class Coopernet {
             body: JSON.stringify({
                 _links: {
                     type: {
-                        href: this.url_server + "rest/type/node/carte"
+                        href: this.url_server + "rest/type/node/card"
                     }
                 },
 
                 type: [
                     {
-                        target_id: "carte"
+                        target_id: "card"
                     }
                 ]
             })
@@ -80,7 +78,7 @@ class Coopernet {
             });
     };
     /**
-     * Méthode qui permet à une carte de changer de colonne
+     * Méthode qui permet à une card de changer de column
      */
     createReqEditColumnCard = (
         num_card,
@@ -108,10 +106,10 @@ class Coopernet {
             body: JSON.stringify({
                 _links: {
                     type: {
-                        href: this.url_server + "rest/type/node/carte"
+                        href: this.url_server + "rest/type/node/card"
                     }
                 },
-                field_carte_colonne: [
+                field_card_column: [
                     {
                         target_id: new_col_id,
                         url: "/taxonomy/term/" + new_col_id
@@ -120,7 +118,7 @@ class Coopernet {
 
                 type: [
                     {
-                        target_id: "carte"
+                        target_id: "card"
                     }
                 ]
             })
@@ -159,7 +157,7 @@ class Coopernet {
             body: JSON.stringify({
                 _links: {
                     type: {
-                        href: this.url_server + "rest/type/node/carte"
+                        href: this.url_server + "rest/type/node/card"
                     }
                 },
                 title: [
@@ -167,28 +165,28 @@ class Coopernet {
                         value: card.question
                     }
                 ],
-                field_carte_question: [
+                field_card_question: [
                     {
                         value: card.question
                     }
                 ],
-                field_carte_reponse: [
+                field_card_answer: [
                     {
-                        value: card.reponse
+                        value: card.answer
                     }
                 ],
-                field_carte_explication: [
+                field_card_explanation: [
                     {
-                        value: card.explication
+                        value: card.explanation
                     }
                 ],
-                field_carte_colonne: [
+                field_card_column: [
                     {
                         target_id: columnid,
                         url: "/taxonomy/term/" + columnid
                     }
                 ],
-                field_carte_thematique: [
+                field_card_thematique: [
                     {
                         target_id: themeid,
                         url: "/taxonomy/term/" + themeid
@@ -196,7 +194,7 @@ class Coopernet {
                 ],
                 type: [
                     {
-                        target_id: "carte"
+                        target_id: "card"
                     }
                 ]
             })
@@ -236,7 +234,7 @@ class Coopernet {
             body: JSON.stringify({
                 _links: {
                     type: {
-                        href: this.url_server + "rest/type/node/carte"
+                        href: this.url_server + "rest/type/node/card"
                     }
                 },
                 title: [
@@ -244,28 +242,28 @@ class Coopernet {
                         value: card.question
                     }
                 ],
-                field_carte_question: [
+                field_card_question: [
                     {
                         value: card.question
                     }
                 ],
-                field_carte_reponse: [
+                field_card_answer: [
                     {
-                        value: card.reponse
+                        value: card.answer
                     }
                 ],
-                field_carte_explication: [
+                field_card_explanation: [
                     {
-                        value: card.explication
+                        value: card.explanation
                     }
                 ],
-                field_carte_colonne: [
+                field_card_column: [
                     {
-                        target_id: card.colonne,
+                        target_id: card.column,
                         url: "/taxonomy/term/" + card.colonnne
                     }
                 ],
-                field_carte_thematique: [
+                field_card_thematique: [
                     {
                         target_id: themeid,
                         url: "/taxonomy/term/" + themeid
@@ -273,7 +271,7 @@ class Coopernet {
                 ],
                 type: [
                     {
-                        target_id: "carte"
+                        target_id: "card"
                     }
                 ]
             })
@@ -389,7 +387,7 @@ class Coopernet {
         req_cards.open(
             "GET",
             this.url_server +
-            "memo/list_cartes_term/" +
+            "memo/list_cards_term/" +
             uid +
             "/" +
             termNumber,
@@ -422,15 +420,15 @@ class Coopernet {
         if (req.status === 200) {
             // Tout baigne, voici le contenu du token
             let jsonResponse = JSON.parse(req.responseText);
-            // ajout de la propriété show_reponse à chaque carte
+            // ajout de la propriété show_answer à chaque card
 
             jsonResponse.forEach(function (element) {
-                element.cartes.forEach(function (ele) {
-                    ele.show_reponse = false;
+                element.cards.forEach(function (ele) {
+                    ele.show_answer = false;
                 });
             });
-            console.log("Récupération des cartes ok pour ", term_name);
-            console.log("Ajout prop show_reponse to all cards", jsonResponse);
+            console.log("Récupération des cards ok pour ", term_name);
+            console.log("Ajout prop show_answer to all cards", jsonResponse);
             callbackSuccess(jsonResponse, termNumber, depth, term_name, has_subterm);
         } else {
             // On y est pas encore, voici le statut actuel
