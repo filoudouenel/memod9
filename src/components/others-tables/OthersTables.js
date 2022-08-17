@@ -441,9 +441,9 @@ class OthersTables extends Component {
             <h2 className='me-4'>Les autres utilisateurs</h2>
             <form
               onSubmit={this.handleSubmitFilterByName}>
-              <label htmlFor="filter-uname">Filtrer par nom &nbsp; &nbsp;</label>
+              <label htmlFor="filter-name">Filtrer par nom &nbsp; &nbsp;</label>
               <input type="text"
-                id="filter-uname"
+                id="filter-name"
                 onChange={this.handleChangeFilterByName}
                 value={this.state.filter_name}
                 autoFocus
@@ -456,14 +456,14 @@ class OthersTables extends Component {
             {
               this.state.users
                 .filter(user => {
-                  if (this.state.filter_name) return user.uname.match(new RegExp(this.state.filter_name, 'i')) && user.uid !== this.state.coopernet.user.uid && user.uid !== "0"
+                  if (this.state.filter_name) return user.name.match(new RegExp(this.state.filter_name, 'i')) && user.uid !== this.state.coopernet.user.uid && user.uid !== "0"
                   else return user.uid !== this.state.coopernet.user.uid && user.uid !== "0"
                 })
                 .map(user => <li
                   onClick={(e) => { this.handleClickName(e, user) }}
                   className="col col-md-2 "
                   key={user.uid}>
-                  <button className="btn btn-secondary m-2 w-100" id={user.uid}>{user.uname}</button>
+                  <button className="btn btn-secondary m-2 w-100" id={user.uid}>{user.name}</button>
                 </li>)}
           </ul>
 
@@ -521,7 +521,7 @@ class OthersTables extends Component {
           </div>
           <div className="row">
             <div className="col">
-              <h2> {this.state.other_user ? 'Les tableaux de ' + this.state.other_user.uname : ''}</h2>
+              <h2> {this.state.other_user ? 'Les tableaux de ' + this.state.other_user.name : ''}</h2>
             </div>
           </div>
           <div className="row">

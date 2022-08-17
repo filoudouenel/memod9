@@ -5,21 +5,21 @@ class Coopernet {
         this.token = "";
         this.user = {
             uid: 0,
-            uname: "",
-            upwd: ""
+            name: "",
+            pwd: ""
         };
     }
-    removeCard = (num_card, login, pwd, callbackSuccess, callbackFailed) => {
-        console.log("dans removeCard - card " + num_card);
+    removeCard = (card_id) => {
+        console.log(`dans removeCard - card_id ${card_id} ${this.user.name} ${this.user.pwd}`);
         // utilisation de fetch
-        fetch(this.url_server + "node/" + num_card + "?_format=hal_json", {
+        return fetch(this.url_server + "node/" + card_id + "?_format=hal_json", {
             // permet d'accepter les cookies ?
             credentials: "same-origin",
             method: "DELETE",
             headers: {
                 "Content-Type": "application/hal+json",
                 "X-CSRF-Token": this.token,
-                Authorization: "Basic " + btoa(login + ":" + pwd) // btoa = encodage en base 64
+                Authorization: "Basic " + btoa(this.user.name + ":" + this.user.pwd) // btoa = encodage en base 64
             },
             body: JSON.stringify({
                 _links: {
@@ -37,16 +37,12 @@ class Coopernet {
         })
             .then(response => response)
             .then(data => {
-                console.log("data reçues:", data);
                 if (data.status === 204) {
-                    callbackSuccess();
+                    console.log(`OK status 204 de removeCard`);
+                    return data;
                 } else {
-                    callbackFailed();
                     throw new Error("Le status du serveur n'est pas 204", data.status);
                 }
-            })
-            .catch(error => {
-                console.error("Erreur attrapée dans removeCard :", error);
             });
     };
     removeTerm = (tid, login, pwd, callbackSuccess, callbackFailed) => {
@@ -151,7 +147,7 @@ class Coopernet {
             headers: {
                 "Content-Type": "application/hal+json",
                 "X-CSRF-Token": this.token,
-                Authorization: "Basic " + btoa(this.user.uname + ":" + this.user.upwd) // btoa = encodage en base 64
+                Authorization: "Basic " + btoa(this.user.name + ":" + this.user.pwd) // btoa = encodage en base 64
             },
             body: JSON.stringify({
                 _links: {
@@ -228,7 +224,7 @@ class Coopernet {
             headers: {
                 "Content-Type": "application/hal+json",
                 "X-CSRF-Token": this.token,
-                Authorization: "Basic " + btoa(this.user.uname + ":" + this.user.upwd) // btoa = encodage en base 64
+                Authorization: "Basic " + btoa(this.user.name + ":" + this.user.pwd) // btoa = encodage en base 64
             },
             body: JSON.stringify({
                 _links: {
@@ -394,7 +390,7 @@ class Coopernet {
         );
         req_cards.setRequestHeader(
             "Authorization",
-            "Basic " + btoa(this.user.uname + ":" + this.user.upwd)
+            "Basic " + btoa(this.user.name + ":" + this.user.pwd)
         );
         req_cards.send(null);
     };
@@ -444,7 +440,7 @@ class Coopernet {
             headers: {
                 "Content-Type": "application/hal+json",
                 "X-CSRF-Token": this.token,
-                "Authorization": "Basic " + btoa(this.user.uname + ":" + this.user.upwd) // btoa = encodage en base 64
+                "Authorization": "Basic " + btoa(this.user.name + ":" + this.user.pwd) // btoa = encodage en base 64
             }
         })
             .then(response => {
@@ -488,8 +484,8 @@ class Coopernet {
                 } else {
                     //console.log("user", data.current_user);
                     this.user.uid = data.current_user.uid;
-                    this.user.uname = data.current_user.name;
-                    this.user.upwd = pwd;
+                    this.user.name = data.current_user.name;
+                    this.user.pwd = pwd;
                 }
             })
     }
@@ -508,7 +504,7 @@ class Coopernet {
             headers: {
                 "Content-Type": "application/hal+json",
                 "X-CSRF-Token": this.token,
-                "Authorization": "Basic " + btoa(this.user.uname + ":" + this.user.upwd) // btoa = encodage en base 64
+                "Authorization": "Basic " + btoa(this.user.name + ":" + this.user.pwd) // btoa = encodage en base 64
             }
         })
             .then(response => {
@@ -638,7 +634,7 @@ class Coopernet {
                 headers: {
                     "Content-Type": "application/hal+json",
                     "X-CSRF-Token": this.token,
-                    Authorization: "Basic " + btoa(this.uname + ":" + this.upwd), // btoa = encodage en base 64
+                    Authorization: "Basic " + btoa(this.name + ":" + this.pwd), // btoa = encodage en base 64
                 },
             }
         )
