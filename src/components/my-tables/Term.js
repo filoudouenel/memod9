@@ -72,10 +72,11 @@ class Term extends Component {
       </div>
     );
   };
-  dumpTermModal = (indexes) => {
+  dumpTermModal = (indexes, term, is_term_selected) => {
     //console.log("Dans dumpTermModal. Indexes : ", indexes);
     if (this.state.open_parameter) {
-      const nb_cards = document.querySelectorAll("article.card").length;
+      console.log(`term infos`, term, is_term_selected);
+      const nb_cards = is_term_selected ? document.querySelectorAll("article.card").length : -1;
       return (
         <Modal
           show={this.state.open_parameter}
@@ -94,12 +95,7 @@ class Term extends Component {
           <Modal.Body>
             <div className="parameter-div">
 
-              {(nb_cards > 0) && (
-                <span className="ml-2 alert alert-warning">
-                  suppression impossible tant que des cards sont attachées à ce
-                  terme.
-                </span>
-              )}
+
               <h3>Modification du terme</h3>
               <form
                 id="edit-term"
@@ -129,14 +125,26 @@ class Term extends Component {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <button
+            {(nb_cards > 0) && (
+              <div className="ml-2 mb-4 alert alert-warning">
+                suppression impossible tant que des cartes ({nb_cards}) sont attachées à ce
+                terme.
+              </div>
+            )}
+            {(nb_cards === -1) && (
+              <div className="ml-2 mb-4 alert alert-warning">
+                Vous devez d'abord cliquer sur le terme pour pouvoir éventuellement le supprimer
+              </div>
+            )}
+            {(nb_cards === 0) && (<button
               className="btn btn-danger"
               onClick={e => {
                 this.props.onDeleteTerm(e, this.props.term, nb_cards);
               }}
             >
               Supprimer
-              </button>
+            </button>)}
+
             <Button variant="primary" onClick={e => this.switchOpenParameter()}>
               Fermer
             </Button>
@@ -168,18 +176,18 @@ class Term extends Component {
           return term.name === this.props.term.name ? (
             ""
           ) : (
-              <li
-                key={term.id}
-                title={`Cliquer pour déplacer la rubrique en cours vers ${term.name}`}
-                className="list-group-item"
-                onClick={e =>
-                  this.props.onChangeTerm(e, this.props.term, term.id, indexes)
-                }
-              >
-                {term.name}
-                {term.hasOwnProperty("children") && this.dumpNestedTermList(term.children, indexes)}
-              </li>
-            );
+            <li
+              key={term.id}
+              title={`Cliquer pour déplacer la rubrique en cours vers ${term.name}`}
+              className="list-group-item"
+              onClick={e =>
+                this.props.onChangeTerm(e, this.props.term, term.id, indexes)
+              }
+            >
+              {term.name}
+              {term.hasOwnProperty("children") && this.dumpNestedTermList(term.children, indexes)}
+            </li>
+          );
         })}
       </ul>
     );
@@ -190,7 +198,7 @@ class Term extends Component {
         <div className="term-div">
 
           {this.dumpTermAsLink(this.props.term.selected, this.props.indexes)}
-          {this.dumpTermModal(this.props.indexes)}
+          {this.dumpTermModal(this.props.indexes, this.props.term, this.props.term.selected)}
         </div>
       </React.Fragment>
     );

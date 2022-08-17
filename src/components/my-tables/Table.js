@@ -198,18 +198,7 @@ class Table extends Component {
 
   }
 
-  successRemoveTerm = () => {
-    console.log("Dans successRemoveTerm ");
-    // Rappel de la fonction qui va chercher la liste des terms
-    this.state.coopernet.getTerms(this.successTerms, this.failedTerms);
-    // on supprime les columns du state
-    const state = { ...this.state };
-    state.columns = [];
-    this.setState(state);
-  };
-  failedRemoveTerm = () => {
-    console.log("Dans failedRemoveTerm");
-  };
+
   successTerms = terms => {
     console.log("Dans successTerms");
     console.log("Termes avant : ", terms);
@@ -667,22 +656,41 @@ class Table extends Component {
         );
       }
     }
-
-
   };
-  handleDeleteTerm = (event, term, nb_cards) => {
-    console.log("Dans handleDeleteTerm");
-    console.log(term);
+  handleDeleteTerm = async (event, term, nb_cards) => {
+    console.log("Dans handleDeleteTerm : ", term);
+
     if (nb_cards) console.log("Vous devez d'abord effacer toutes les cards : ", nb_cards);
-    else {
-      this.state.coopernet.removeTerm(
-        term.id,
-        this.state.coopernet.user.name,
-        this.state.coopernet.user.pwd,
-        this.successRemoveTerm,
-        this.failedRemoveTerm)
+    else if (window.confirm('Etes vous sûr.e de vouloir supprimer ce terme ?')) {
+      try {
+        await this.state.coopernet.removeTerm(term.id);
+        // on supprime le terme en question
+        const state = { ...this.state };
+        let term_index = state.terms.findIndex(element => {
+          return element.id === term.id;
+        });
+        if (term_index !== -1) {
+          state.terms.splice(term_index, 1);
+          state.columns = [];
+          this.setState(state);
+        }
+
+      } catch (error) {
+        console.error("Erreur attrapée a l'appel de removeTerm :", error);
+      }
+
     }
   }
+  successRemoveTerm = () => {
+    console.log("Dans successRemoveTerm ");
+    // Rappel de la fonction qui va chercher la liste des terms
+    this.state.coopernet.getTerms(this.successTerms, this.failedTerms);
+    // on supprime les columns du state
+    const state = { ...this.state };
+    state.columns = [];
+    this.setState(state);
+  };
+
   handleSubmitEditTerm = (event, term) => {
     console.log("Dans handleSubmitEditTerm - Term modifié : ", term);
     event.preventDefault();

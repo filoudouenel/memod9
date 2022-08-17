@@ -9,8 +9,13 @@ class Coopernet {
             pwd: ""
         };
     }
+    /**
+     * Appel d'un endpoint de suppression de carte sur le serveur
+     * @param {Number} card_id 
+     * @returns Promise
+     */
     removeCard = (card_id) => {
-        console.log(`dans removeCard - card_id ${card_id} ${this.user.name} ${this.user.pwd}`);
+        console.log(`dans removeCard - card_id ${card_id}`);
         // utilisation de fetch
         return fetch(this.url_server + "node/" + card_id + "?_format=hal_json", {
             // permet d'accepter les cookies ?
@@ -45,31 +50,33 @@ class Coopernet {
                 }
             });
     };
-    removeTerm = (tid, login, pwd, callbackSuccess, callbackFailed) => {
-        console.log("dans removeTerm - term " + tid);
+    /**
+     * Appel d'un endpoint de suppression de Term sur le serveur
+     * 
+     * @param {Number} tid 
+     * @returns Promise
+     */
+    removeTerm = (tid) => {
+        console.log("dans removeTerm - term ", tid);
         // utilisation de fetch
-        fetch(this.url_server + "taxonomy/term/" + tid + "?_format=hal_json", {
+        return fetch(this.url_server + "taxonomy/term/" + tid + "?_format=hal_json", {
             // permet d'accepter les cookies ?
             credentials: "same-origin",
             method: "DELETE",
             headers: {
                 "Content-Type": "application/hal+json",
                 "X-CSRF-Token": this.token,
-                Authorization: "Basic " + btoa(login + ":" + pwd) // btoa = encodage en base 64
+                Authorization: "Basic " + btoa(this.user.name + ":" + this.user.pwd) // btoa = encodage en base 64
             }
         })
             .then(response => response)
             .then(data => {
                 console.log("data reçues dans removeTerm:", data);
                 if (data.status === 204) {
-                    callbackSuccess();
+                    return data;
                 } else {
-                    callbackFailed();
                     throw new Error("Le status du serveur n'est pas 204", data.status);
                 }
-            })
-            .catch(error => {
-                console.error("Erreur attrapée dans removeTerm :", error);
             });
     };
     /**
@@ -410,7 +417,7 @@ class Coopernet {
         depth,
         term_name,
         has_subterm) => {
-        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Dans getCards de coopernet. termNumber : ", termNumber, req.status);
+        console.log("Dans getCards de coopernet. termNumber : ", termNumber, req.status);
         // On teste directement le status de notre instance de XMLHttpRequest
         if (req.status === 200) {
 
