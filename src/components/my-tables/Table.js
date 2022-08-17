@@ -96,12 +96,12 @@ class Table extends Component {
   successEditColumnCard = themeid => {
     console.log("Dans successEditColumnCard");
     // Rappel de la fonction qui va chercher la liste des cards pour une thématique
-    this.state.coopernet.createReqCards(
+    /* this.state.coopernet.createReqCards(
       themeid,
       this.successGetCards,
       this.failedCards,
       -1
-    );
+    ); */
   };
   failedEditColumnCard = () => {
     console.log("Dans failedEditColumnCard");
@@ -113,12 +113,12 @@ class Table extends Component {
     // une thématique. Si reload_current_term est vrai, on recharge
     // le terme en cours. C'est utile dans le cas d'un déplacement de card.
     themeid = (reload_current_term) ? this.themeId : themeid;
-    this.state.coopernet.createReqCards(
+    /* this.state.coopernet.createReqCards(
       themeid,
       this.successGetCards,
       this.failedCards,
       -1
-    );
+    ); */
   };
 
   failedEditCard = () => {
@@ -127,12 +127,12 @@ class Table extends Component {
   successAddCard = themeid => {
     console.log("Dans successAddCard");
     // Rappel de la fonction qui va chercher la liste des cards pour une thématique
-    this.state.coopernet.createReqCards(
+    /* this.state.coopernet.createReqCards(
       themeid,
       this.successGetCards,
       this.failedCards,
       -1
-    );
+    ); */
   };
   failedAddCard = () => {
     console.log("Dans failedAddCard");
@@ -160,12 +160,12 @@ class Table extends Component {
 
     this.setState(state);
     // création de la requête pour obtenir les cards correspondantes à la thématique
-    if (action_type === "added") this.state.coopernet.createReqCards(
+    /* if (action_type === "added") this.state.coopernet.createReqCards(
       tid,
       this.successGetCards,
       this.failedCards,
       -1
-    );
+    ); */
   };
   failedAddOrEditTerm = () => {
     console.log("Dans failedAddOrEditTerm");
@@ -209,46 +209,7 @@ class Table extends Component {
   failedTerms = () => {
     console.log("Dans failedTerms");
   };
-  /**
-   * @param  {array} cols
-   * @param  {number} termId
-   * @param  {number} depth
-   * @param  {string} term_name
-   * @param  {boolean} has_subterm
-   */
-  successGetCards = (cols, termId, depth, term_name, has_subterm) => {
-    console.log("Dans successGetCards pour le term : ",
-      term_name, " has_subterm : ", has_subterm, "columns : ", cols);
-    // Des cards sont-elles liées à cette thématique
-    let term_has_cards = false;
-    for (let i = 0; i < cols.length; i++) {
-      if (cols[i].cards.length > 0) {
-        term_has_cards = true
-        break;
-      }
-    }
-    // si le term cliqué n'est pas de niveau 0 sans card et avec sous-termes
-    // ou si le term cliqué est de niveau 0 et avec cards
-    // alors on change la rubrique
-    console.log("################ - depth - term_has_cards - term_name", depth, term_has_cards, term_name);
-    if ((!(depth === 1 && !term_has_cards && has_subterm)) ||
-      (depth === 1 && term_has_cards)) {
 
-      cols.sort((a, b) => a.id - b.id);
-      console.log("Columns : ", cols);
-      const state = { ...this.state };
-      state.columns = cols;
-
-      // on sait maintenant quel term (thématique) est affiché
-      this.themeId = termId;
-      state.term_name = term_name;
-      this.setState(state);
-    }
-
-  };
-  failedCards = () => {
-    console.log("Dans failedCards");
-  };
 
   handleSubmitAddOrEditCard = (event, editedCard = false, new_term = null) => {
     console.log("dans handleSubmitAddOrEditCard - card modifiée = ", editedCard);
@@ -328,8 +289,8 @@ class Table extends Component {
    * @param  {} term_name
    * @param  {boolean} has_subterm
    */
-  handleClickDropdownToggle = (e, term_id, indexes, term_name, has_subterm) => {
-    console.log("ici dans handleClickDropdownToggle");
+  handleClickDropdownToggle = async (e, term_id, indexes, term_name, has_subterm) => {
+    console.log("dans handleClickDropdownToggle");
     console.log("chemin du terme clické : ", indexes);
     console.log("profondeur : ", indexes.length);
     console.log("State des terms : ", this.state.terms);
@@ -345,41 +306,73 @@ class Table extends Component {
       state.terms[indexes[0]].selected &&
       !state.terms[indexes[0]].open) {
       // on passe le terme de nivau 0 à "open"
-      console.log("#############################cas 1");
+      console.log("#############################cas 1 - on ouvre une rubrique qui a des sous-rubriques");
       state.terms[indexes[0]].open = true;
+      this.setState(state);
     } else if ((indexes.length === 1) &&
       state.terms[indexes[0]].open) {
-      console.log("#############################cas 2");
+      console.log("############################# cas 2 on clique sur une rubrique de niveau 1 qui est déjà ouverte");
 
       this.browseTreeToManageSelected(state.terms, indexes);
-      this.state.coopernet.createReqCards(
-        term_id,
-        this.successGetCards,
-        this.failedCards,
-        indexes.length,
-        term_name
-      );
+      console.log(`Appel de getCards 1`);
       state.terms[indexes[0]].open = false;
+      this.setState(state);
 
     }
     else {
-      console.log("#############################cas 3. Term : ",
+      console.log("#############################cas 3. On clique sur un terme pour afficher les cartes correspondantes ",
         term_name, " - hassubterm : ", has_subterm);
       // on gère l'état des terms (selected, open) grâce à une fonction récursive
       // à laquelle on passe par référence state.terms
       this.browseTreeToManageSelected(state.terms, indexes);
-      this.state.coopernet.createReqCards(
-        term_id,
-        this.successGetCards,
-        this.failedCards,
-        indexes.length,
-        term_name,
-        has_subterm
-      );
-      //state.term_name = term_name;
-    }
+      try {
+        const columns = await this.state.coopernet.getCards(term_id);
+        console.log(`columns : `, columns);
+        state.columns = columns;
+        state.term_name = term_name;
+        this.setState(state);
+        //this.successGetCards(this.state.columns, term_id, 0, term_name, has_subterm);
+      } catch (error) {
+        console.error("Erreur attrapée à l'appel de getCards", error);
+      }
 
-    this.setState(state);
+    }
+  };
+  /**
+   * @param  {array} cols
+   * @param  {number} termId
+   * @param  {number} depth
+   * @param  {string} term_name
+   * @param  {boolean} has_subterm
+   */
+  successGetCards = (cols, termId, depth, term_name, has_subterm) => {
+    console.log("Dans successGetCards pour le term : ",
+      term_name, " has_subterm : ", has_subterm, "columns : ", cols);
+    // Des cards sont-elles liées à cette thématique
+    let term_has_cards = false;
+    for (let i = 0; i < cols.length; i++) {
+      if (cols[i].cards.length > 0) {
+        term_has_cards = true
+        break;
+      }
+    }
+    // si le term cliqué n'est pas de niveau 0 sans card et avec sous-termes
+    // ou si le term cliqué est de niveau 0 et avec cards
+    // alors on change la rubrique
+    console.log("################ - depth - term_has_cards - term_name", depth, term_has_cards, term_name);
+    if ((!(depth === 1 && !term_has_cards && has_subterm)) ||
+      (depth === 1 && term_has_cards)) {
+
+      cols.sort((a, b) => a.id - b.id);
+      console.log("Columns : ", cols);
+      const state = { ...this.state };
+      state.columns = cols;
+
+      // on sait maintenant quel term (thématique) est affiché
+      this.themeId = termId;
+      state.term_name = term_name;
+      this.setState(state);
+    }
 
   };
   /**

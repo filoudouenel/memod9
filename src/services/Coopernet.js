@@ -4,7 +4,7 @@ class Coopernet {
         this.url_server = (process.env.NODE_ENV == 'development') ? 'http://local.coopernet.my/' : 'https://coopernet.fr/';
         this.token = "";
         this.user = {
-            uid: 0,
+            id: 0,
             name: "",
             pwd: ""
         };
@@ -352,90 +352,38 @@ class Coopernet {
             });
     };
 
-    /**
-     * @param  {number} termNumber
-     * @param  {function} callbackSuccess
-     * @param  {function} callbackFailed
-     * @param  {number} depth=-1 Va permettre de savoir s'il faut ou pas recharger
-     * @param  {string} term_name
-     * @param  {number} subterm_size
+
+    /*
+     * Récupère les données structurées sous forme de json imbriqué
+     * @param {Number} term_id 
+     * @returns Promise
      */
-    createReqCards = (
-        termNumber,
-        callbackSuccess,
-        callbackFailed,
-        depth = -1,
-        term_name = "",
-        has_subterm = true,
-        uid = this.user.uid
-    ) => {
-        // création de la requête
-        console.log("?????????????????????????????Dans createReqCards de coopernet. termNumber, uid : ", termNumber, this.user.uid);
-        //console.log("token : ", this.token);
-        const req_cards = new XMLHttpRequest();
-        req_cards.onload = () => {
-            // passage de la requête en paramètre, sinon, c'est this (coopernet qui serait utilisé)
-            this.getCards(req_cards,
-                termNumber,
-                callbackSuccess,
-                callbackFailed,
-                depth,
-                term_name,
-                has_subterm);
-        };
-        // Fait appel au "end-point créé dans le module drupal memo"
-        // Pour régler le problème de cache, j'ai ajouté le paramètre "time" à la
-        // requête get cf : https://drupal.stackexchange.com/questions/222467/drupal-8-caches-rest-api-calls/222482
-        req_cards.open(
-            "GET",
+    getCards = (term_id) => {
+        return fetch(
             this.url_server +
             "memo/list_cards_term/" +
-            uid +
+            this.user.id +
             "/" +
-            termNumber,
-            true
-        );
-        req_cards.setRequestHeader(
-            "Authorization",
-            "Basic " + btoa(this.user.name + ":" + this.user.pwd)
-        );
-        req_cards.send(null);
-    };
-    /**
-     * @param  {XMLHttpRequest} req
-     * @param  {number} termNumber
-     * @param  {function} callbackSuccess
-     * @param  {function} callbackFailed
-     * @param  {number} depth
-     * @param  {string} term_name
-     * @param  {number} subterm_size
-     */
-    getCards = (req,
-        termNumber,
-        callbackSuccess,
-        callbackFailed,
-        depth,
-        term_name,
-        has_subterm) => {
-        console.log("Dans getCards de coopernet. termNumber : ", termNumber, req.status);
-        // On teste directement le status de notre instance de XMLHttpRequest
-        if (req.status === 200) {
-
-            let jsonResponse = JSON.parse(req.responseText);
-            // ajout de la propriété show_answer à chaque card
-
-            jsonResponse.forEach(function (element) {
-                element.cards.forEach(function (ele) {
-                    ele.show_answer = false;
-                });
+            term_id,
+            {
+                credentials: "same-origin",
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/hal+json",
+                    "X-CSRF-Token": this.token,
+                    Authorization: "Basic " + btoa(this.user.name + ":" + this.user.pwd), // btoa = encodage en base 64
+                },
+            }
+        )
+            .then((response) => {
+                if (response.status === 200) return response.json();
+                else throw new Error("Problème de réponse du serveur :  " + response.status);
+            })
+            .then((data) => {
+                console.log("Data dans getCards : ", data);
+                return data;
             });
-            console.log("Récupération des cards ok pour ", term_name);
-            console.log("Ajout prop show_answer to all cards", jsonResponse);
-            callbackSuccess(jsonResponse, termNumber, depth, term_name, has_subterm);
-        } else {
-            // On y est pas encore, voici le statut actuel
-            console.log("Pb getCards - Statut : ", req.status, req.statusText);
-        }
+
     };
     getUsers = (callbackSuccess, callbackFailed) => {
         // création de la requête
@@ -489,8 +437,7 @@ class Coopernet {
                     console.log("Erreur de login");
                     throw new Error("Erreur de data : ", data);
                 } else {
-                    //console.log("user", data.current_user);
-                    this.user.uid = data.current_user.uid;
+                    this.user.id = data.current_user.uid;
                     this.user.name = data.current_user.name;
                     this.user.pwd = pwd;
                 }
@@ -504,7 +451,7 @@ class Coopernet {
         // création de la requête
         console.log("Dans getTerms de coopernet. User = ", user);
         fetch(this.url_server + "memo/themes/" +
-            user.uid, {
+            user.id, {
             // permet d'accepter les cookies ?
             credentials: "same-origin",
             method: "GET",

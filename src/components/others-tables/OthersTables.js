@@ -179,15 +179,15 @@ class OthersTables extends Component {
       // on gère l'état des terms (selected, open) grâce à une fonction récursive
       // à laquelle on passe par référence state.terms
       this.browseTreeToManageSelected(state.terms, indexes);
-      this.state.coopernet.createReqCards(
+      /* this.state.coopernet.createReqCards(
         term_id,
         this.successGetCards,
         this.failedCards,
         indexes.length,
         term_name,
         has_subterm,
-        this.state.other_user.uid
-      );
+        this.state.other_user.id
+      ); */
       //state.term_name = term_name;
     }
 
@@ -400,7 +400,7 @@ class OthersTables extends Component {
 
     const user_id = document.getElementById("ul-users-button").querySelector("li > button").getAttribute("id");
     const user_index = this.state.users.findIndex(user => {
-      return user.uid === user_id;
+      return user.id === user_id;
     });
     const user = this.state.users[user_index];
     console.log('user_id : ', user_id);
@@ -456,14 +456,14 @@ class OthersTables extends Component {
             {
               this.state.users
                 .filter(user => {
-                  if (this.state.filter_name) return user.name.match(new RegExp(this.state.filter_name, 'i')) && user.uid !== this.state.coopernet.user.uid && user.uid !== "0"
-                  else return user.uid !== this.state.coopernet.user.uid && user.uid !== "0"
+                  if (this.state.filter_name) return user.name.match(new RegExp(this.state.filter_name, 'i')) && user.id !== this.state.coopernet.user.id && user.id !== "0"
+                  else return user.id !== this.state.coopernet.user.id && user.id !== "0"
                 })
                 .map(user => <li
                   onClick={(e) => { this.handleClickName(e, user) }}
                   className="col col-md-2 "
-                  key={user.uid}>
-                  <button className="btn btn-secondary m-2 w-100" id={user.uid}>{user.name}</button>
+                  key={user.id}>
+                  <button className="btn btn-secondary m-2 w-100" id={user.id}>{user.name}</button>
                 </li>)}
           </ul>
 
