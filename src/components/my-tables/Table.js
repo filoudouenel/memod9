@@ -35,12 +35,16 @@ class Table extends Component {
     try {
       // création de la requête pour obtenir les thématiques
       console.log('Dans componentDidMount de Table : ', this.state.coopernet);
-      this.state.coopernet.getTerms(this.successTerms, this.failedTerms);
+      const terms = await this.state.coopernet.getTerms();
+      const state = { ...this.state };
+      state.terms = terms;
+      this.setState(state);
 
     } catch (error) {
-      console.error(`Erreur attrapée dans componentDidMount ` + error);
+      console.error(`Erreur attrapée dans componentDidMount de Table à l'appel de getTerms ` + error);
     }
   }
+
   unlog = () => {
     console.log("Dans unlog");
     const state = { ...this.state };
@@ -137,7 +141,7 @@ class Table extends Component {
   failedAddCard = () => {
     console.log("Dans failedAddCard");
   };
-  successAddOrEditTerm = (tid, action_type) => {
+  successAddOrEditTerm = async (tid, action_type) => {
     console.log(
       "Dans successAddOrEditTerm - Action : " +
       action_type +
@@ -152,9 +156,14 @@ class Table extends Component {
     let term_index = state.terms.findIndex(element => {
       return element.id === tid;
     });
-    // création de la requête pour obtenir les thématiques
+    try {
+      // création de la requête pour obtenir les thématiques
+      const terms = await this.state.coopernet.getTerms();
+      state.terms = terms;
 
-    this.state.coopernet.getTerms(this.successTerms, this.failedTerms);
+    } catch (error) {
+      console.error(`Erreur catchée dans successAddOrEditTerm lors de l'appel de getTerms`);
+    }
 
     if (action_type !== "added") state.terms[term_index].selected = true;
 
@@ -199,16 +208,7 @@ class Table extends Component {
   }
 
 
-  successTerms = terms => {
-    console.log("Dans successTerms");
-    console.log("Termes avant : ", terms);
-    const state = { ...this.state };
-    state.terms = terms;
-    this.setState(state);
-  };
-  failedTerms = () => {
-    console.log("Dans failedTerms");
-  };
+
 
 
   handleSubmitAddOrEditCard = (event, editedCard = false, new_term = null) => {
@@ -677,11 +677,11 @@ class Table extends Component {
   successRemoveTerm = () => {
     console.log("Dans successRemoveTerm ");
     // Rappel de la fonction qui va chercher la liste des terms
-    this.state.coopernet.getTerms(this.successTerms, this.failedTerms);
+    /* this.state.coopernet.getTerms();
     // on supprime les columns du state
     const state = { ...this.state };
     state.columns = [];
-    this.setState(state);
+    this.setState(state); */
   };
 
   handleSubmitEditTerm = (event, term) => {

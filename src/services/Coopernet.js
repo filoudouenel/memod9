@@ -444,13 +444,13 @@ class Coopernet {
             })
     }
     /**
-     * @param  {} callbackSuccess
-     * @param  {} callbackFailed
+     * Récupère les termes d'un utilisateur
+     * @param {Object} user 
      */
-    getTerms = (callbackSuccess, callbackFailed, user = this.user) => {
+    getTerms = (user = this.user) => {
         // création de la requête
         console.log("Dans getTerms de coopernet. User = ", user);
-        fetch(this.url_server + "memo/themes/" +
+        return fetch(this.url_server + "memo/themes/" +
             user.id, {
             // permet d'accepter les cookies ?
             credentials: "same-origin",
@@ -469,16 +469,11 @@ class Coopernet {
             .then(data => {
                 console.log("data reçues dans getTerms :", data);
                 if (data) {
-                    // ajout de la propriété "open" à "false" pour tous les termes de
-                    // niveau 1
-                    //data.forEach()
-                    callbackSuccess(data, user);
+                    return data;
                 } else {
-                    callbackFailed("Erreur de login ou de mot de passe");
                     throw new Error("Problème de data ", data);
                 }
-            })
-            .catch(error => { console.error("Erreur attrapée dans getTerms", error); });
+            });
     };
 
 
