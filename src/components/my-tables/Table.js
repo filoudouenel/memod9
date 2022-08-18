@@ -60,7 +60,7 @@ class Table extends Component {
    */
   moveCard = (card, column, direction) => {
     console.log("Dans moveCard");
-    //console.log(card,column,direction);
+    console.log(card, column, direction, this.themeId);
 
     // récupération de l'index de la column
     const current_column_index = this.state.columns.indexOf(column);
@@ -97,15 +97,18 @@ class Table extends Component {
     );
   };
   ;
-  successEditColumnCard = themeid => {
+  successEditColumnCard = async themeid => {
     console.log("Dans successEditColumnCard");
-    // Rappel de la fonction qui va chercher la liste des cards pour une thématique
-    /* this.state.coopernet.createReqCards(
-      themeid,
-      this.successGetCards,
-      this.failedCards,
-      -1
-    ); */
+    try {
+      // Rappel de la fonction qui va chercher la liste des cards pour une thématique
+      const columns = await this.state.coopernet.getCards(themeid);
+      const state = { ...this.state };
+      state.columns = columns;
+      this.setState(state);
+    } catch (error) {
+      console.error(`Exception attrappée dans successEditColumnCard : `, error);
+    }
+
   };
   failedEditColumnCard = () => {
     console.log("Dans failedEditColumnCard");
@@ -330,10 +333,11 @@ class Table extends Component {
         console.log(`columns : `, columns);
         state.columns = columns;
         state.term_name = term_name;
+        this.themeId = term_id;
         this.setState(state);
         //this.successGetCards(this.state.columns, term_id, 0, term_name, has_subterm);
       } catch (error) {
-        console.error("Erreur attrapée à l'appel de getCards", error);
+        console.error("Erreur attrapée à l'appel de getCards dans handleClickDropdownToggle", error);
       }
 
     }
