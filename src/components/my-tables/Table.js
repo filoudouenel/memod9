@@ -650,23 +650,45 @@ class Table extends Component {
       }
     }
   };
-  handleDeleteTerm = async (event, term, nb_cards) => {
-    console.log("Dans handleDeleteTerm : ", term);
+  handleDeleteTerm = async (event, term, nb_cards, term_indexes) => {
+    console.log("Dans handleDeleteTerm, term_indexes: ", term, term_indexes);
 
     if (nb_cards) console.log("Vous devez d'abord effacer toutes les cards : ", nb_cards);
     else if (window.confirm('Etes vous sûr.e de vouloir supprimer ce terme ?')) {
       try {
         await this.state.coopernet.removeTerm(term.id);
-        // on supprime le terme en question
+        // on supprime le terme en question dans l'interface puisque la suppression sur le serveur a fonctionné
         const state = { ...this.state };
-        let term_index = state.terms.findIndex(element => {
-          return element.id === term.id;
-        });
-        if (term_index !== -1) {
-          state.terms.splice(term_index, 1);
-          state.columns = [];
-          this.setState(state);
+        console.log(`terms : `, state.terms);
+        /* 
+         */
+        // ATTENTION : 
+
+        // solution la plus simple : appeler getTerms mais l'exécution est plus longue puisqu'il faut intéroger le serveur
+        // création de la requête pour obtenir les thématiques
+        const terms = await this.state.coopernet.getTerms();
+        state.terms = terms;
+        state.columns = [];
+        state.term_name = `Terme "${state.term_name}" supprimé`;
+        this.setState(state);
+
+        // Solution plus compliquée mais qui donnerait un résultat plus rapide : 
+        // si le terme est imbriqué, il faut retrouver les index concernés du tableau "terms"
+        /* let children_table_to_delete = state.terms;
+        if (term_indexes.length > 1) {
+          for (let i = 0; i < (term_indexes.length - 1); i++) {
+            children_table_to_delete = children_table_to_delete.children[i];
+          }
         }
+
+        let term_index = term_indexes[term_indexes.length - 1];
+        console.log(`children_table_to_delete `, children_table_to_delete);
+        console.log(`term_index `, term_index);
+        if (term_index !== -1) {
+          children_table_to_delete.splice(term_index, 1);
+          state.columns = [];
+          //this.setState(state);
+        } */
 
       } catch (error) {
         console.error("Erreur attrapée a l'appel de removeTerm :", error);
@@ -674,15 +696,7 @@ class Table extends Component {
 
     }
   }
-  successRemoveTerm = () => {
-    console.log("Dans successRemoveTerm ");
-    // Rappel de la fonction qui va chercher la liste des terms
-    /* this.state.coopernet.getTerms();
-    // on supprime les columns du state
-    const state = { ...this.state };
-    state.columns = [];
-    this.setState(state); */
-  };
+
 
   handleSubmitEditTerm = (event, term) => {
     console.log("Dans handleSubmitEditTerm - Term modifié : ", term);
@@ -699,6 +713,8 @@ class Table extends Component {
     const tid = 0; // dans le cas d'un ajout, on a pas encore le tid
     if (term_label && isNaN(term_label)) {
       console.log("input du term non vide et pas un nombre");
+
+      // ATTENTION : ici on ne crée pas vraiment un terme mais on en ajoute un sur le serveur et on rafraîchit...
       this.state.coopernet.createReqAddOrEditTerm(
         this.state.coopernet.user.name,
         this.state.coopernet.user.pwd,

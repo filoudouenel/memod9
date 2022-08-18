@@ -139,7 +139,7 @@ class Term extends Component {
             {(nb_cards === 0) && (<button
               className="btn btn-danger"
               onClick={e => {
-                this.props.onDeleteTerm(e, this.props.term, nb_cards);
+                this.props.onDeleteTerm(e, this.props.term, nb_cards, indexes);
               }}
             >
               Supprimer
