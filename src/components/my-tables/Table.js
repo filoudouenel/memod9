@@ -821,6 +821,7 @@ class Table extends Component {
                   index={index}
                   onChangeTerm={this.handleChangeTerm}
                   onDeleteTerm={this.handleDeleteTerm}
+                  admin_mode={this.props.admin_mode}
                 />
               ))}
             </ul>
@@ -934,6 +935,7 @@ class Table extends Component {
                 user={this.state.coopernet.user}
                 col_index={index}
                 coopernet={this.props.coopernet}
+                admin_mode={this.props.admin_mode}
               />
             );
           })}

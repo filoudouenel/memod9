@@ -32,7 +32,7 @@ class Term extends Component {
       <div className={`d-flex btn m-2 ${classes}`}>
         <a
           href="."
-          className="pr-3"
+          className="pr-3 text-decoration-none"
           onClick={e => {
             e.preventDefault();
             this.props.onClickDropdownToggle(e,
@@ -50,25 +50,27 @@ class Term extends Component {
             dangerouslySetInnerHTML={{ __html: subterm_size }}
           ></span>
         </a>
-        <div className="d-flex">
-          {/* icône des paramètres (engrenage) */}
-          <svg
-            onClick={e => {
-              this.switchOpenParameter();
-            }}
-            className="icon"
-            stroke="currentColor"
-            fill="currentColor"
-            strokeWidth="0"
-            viewBox="0 0 14 16"
-            height="1.5rem"
-            width="1.5rem"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path>
-          </svg>
+        {this.props.admin_mode && (
+          <div className="d-flex">
+            {/* icône des paramètres (engrenage) */}
+            <svg
+              onClick={e => {
+                this.switchOpenParameter();
+              }}
+              className="icon"
+              stroke="currentColor"
+              fill="currentColor"
+              strokeWidth="0"
+              viewBox="0 0 14 16"
+              height="1.5rem"
+              width="1.5rem"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path>
+            </svg>
 
-        </div>
+          </div>
+        )}
       </div>
     );
   };
