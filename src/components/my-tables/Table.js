@@ -113,33 +113,32 @@ class Table extends Component {
   failedEditColumnCard = () => {
     console.log("Dans failedEditColumnCard");
   };
-  successEditCard = (themeid, reload_current_term) => {
+  successEditCard = async (term_id, reload_current_term) => {
     console.log("#############Dans successEditCard - reload_current_term : ", reload_current_term);
 
     // Rappel de la fonction qui va chercher la liste des cards pour
     // une thématique. Si reload_current_term est vrai, on recharge
     // le terme en cours. C'est utile dans le cas d'un déplacement de card.
-    themeid = (reload_current_term) ? this.themeId : themeid;
-    /* this.state.coopernet.createReqCards(
-      themeid,
-      this.successGetCards,
-      this.failedCards,
-      -1
-    ); */
+    term_id = (reload_current_term) ? this.themeId : term_id;
+
   };
 
   failedEditCard = () => {
     console.log("Dans failedEditCard");
   };
-  successAddCard = themeid => {
+  successAddCard = async term_id => {
     console.log("Dans successAddCard");
     // Rappel de la fonction qui va chercher la liste des cards pour une thématique
-    /* this.state.coopernet.createReqCards(
-      themeid,
-      this.successGetCards,
-      this.failedCards,
-      -1
-    ); */
+    try {
+      const columns = await this.state.coopernet.getCards(term_id);
+      console.log(`columns : `, columns);
+      const state = { ...this.state };
+      state.columns = columns;
+      this.themeId = term_id;
+      this.setState(state);
+    } catch (error) {
+      console.error("Erreur attrapée à l'appel de getCards dans handleClickDropdownToggle", error);
+    }
   };
   failedAddCard = () => {
     console.log("Dans failedAddCard");
