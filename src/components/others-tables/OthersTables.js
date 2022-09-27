@@ -5,12 +5,12 @@ import Column from './Column';
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { FiUserMinus, FiUserPlus } from "react-icons/fi";
+import Coopernet from "../../services/Coopernet";
 
 class OthersTables extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      coopernet: this.props.coopernet,
       userIsLogged: this.props.userIsLogged,
       users: [],
       terms: [],
@@ -27,13 +27,13 @@ class OthersTables extends Component {
     this.editedCardIndexes = null;
   }
   componentDidMount = async () => {
-    const users = await this.state.coopernet.getUsers();
+    const users = await Coopernet.getUsers();
     console.log('users dans componentDidMount de OthersTables : ', users);
     const state = { ...this.state };
     state.users = users;
 
     // récupération des termes de l'utilisateur
-    this.state.coopernet.getTerms(this.successMyTerms, this.failedMyTerms);
+    Coopernet.getTerms();
     this.setState(state);
   }
   /**
@@ -196,7 +196,8 @@ class OthersTables extends Component {
   };
   handleClickName = (e, o_user) => {
     console.log('dans handleClickName de OthersTables. User : ', o_user);
-    this.state.coopernet.getTerms(this.successTerms, this.failedTerms, o_user);
+    o_user.id = o_user.uid;
+    Coopernet.getTerms(o_user);
     const state = { ...this.state };
     state.columns = [];
     this.setState(state);
@@ -273,18 +274,7 @@ class OthersTables extends Component {
   failedCards = () => {
     console.log("Dans failedCards");
   };
-  successTerms = (terms, user) => {
-    console.log("Dans successTerms de OthersTables");
-    console.log("Termes avant : ", terms);
-    const state = { ...this.state };
-    state.terms = terms;
-    state.other_user = user;
-    state.show_users = false;
-    this.setState(state);
-  };
-  failedTerms = () => {
-    console.log("Dans failedTerms de OthersTables");
-  };
+
   successMyTerms = terms => {
     console.log("Dans successMyTerms de OthersTables");
     const state = { ...this.state };
@@ -456,15 +446,19 @@ class OthersTables extends Component {
             {
               this.state.users
                 .filter(user => {
-                  if (this.state.filter_name) return user.name.match(new RegExp(this.state.filter_name, 'i')) && user.id !== this.state.coopernet.user.id && user.id !== "0"
-                  else return user.id !== this.state.coopernet.user.id && user.id !== "0"
+                  if (this.state.filter_name) return user.uname.match(new RegExp(this.state.filter_name, 'i')) && user.id !== Coopernet.user.id && user.id !== "0"
+                  else return user.id !== Coopernet.user.id && user.id !== "0"
                 })
-                .map(user => <li
-                  onClick={(e) => { this.handleClickName(e, user) }}
-                  className="col col-md-2 "
-                  key={user.id}>
-                  <button className="btn btn-secondary m-2 w-100" id={user.id}>{user.name}</button>
-                </li>)}
+                .map(user => {
+                 return <li
+                      onClick={(e) => {
+                        this.handleClickName(e, user)
+                      }}
+                      className="col col-md-2 "
+                      key={user.uid}>
+                    <button className="btn btn-secondary m-2 w-100" id={user.uid}>{user.uname}</button>
+                  </li>
+                })}
           </ul>
 
           {this.state.other_user && (
