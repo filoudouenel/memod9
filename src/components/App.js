@@ -24,6 +24,7 @@ class App extends Component {
 
       await Coopernet.setOAuthToken();
       localStorage.setItem('token', JSON.stringify(Coopernet.oauth.refresh_token));
+      await Coopernet.isLoggedIn()
 
       this.setState(() => {
         return { is_logged_in: true,  error_msg: ""};
