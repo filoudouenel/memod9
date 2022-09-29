@@ -32,8 +32,8 @@ class Coopernet {
     static setPayload = refresh => {
         const payload = new FormData();
 
-        payload.append("client_id", "95dc3f28-d79b-4bdd-a161-2bbc724522ab");
-        payload.append("client_secret", "51biba95");
+        payload.append("client_id", "54003bfb-057a-486f-8eb1-8c20a0952e19");
+        payload.append("client_secret", "pkyuRTHr8hy:;O6tTo");
 
         if (refresh) {
             payload.append("grant_type", "refresh_token");
@@ -91,6 +91,8 @@ class Coopernet {
 
         if (response.ok) {
             const token = await response.json();
+            // token est un objet avec plusieurs propriétés dont refresh_token, access_token, expires_in, ...
+            console.log("token : ", token);
             this.oauth = token;
             this.oauth.expireAt = Date.now() + token.expires_in * 1000;
             return true;
@@ -114,7 +116,7 @@ class Coopernet {
         const refreshToken = JSON.parse(localStorage.getItem('token')); //Récupère le refresh token dans le local storage
         if (refreshToken) { //Vérifie si il y en a un, si il y en a pas, return false
             this.oauth.refresh_token = refreshToken; //Affecte la valeur du token récupéré
-            if (await Coopernet.setRefreshToken()) { //Si la création d'un nouveau token complet à l'aide du refresh_token fonctionne :
+            if (await Coopernet.setRefreshToken()) { //Si la création d'un nouveau token sur coopernet à l'aide du refresh_token du local storage fonctionne :
                 await Coopernet.getCsrfToken();
                 localStorage.setItem('token', JSON.stringify(this.oauth.refresh_token)); //Le refresh_token a été rafraîchi, donc je stock le nouveau
                 return true;

@@ -37,12 +37,9 @@ class Table extends Component {
             // création de la requête pour obtenir les thématiques
             console.log('Dans componentDidMount de Table : ', Coopernet);
             const terms = await Coopernet.getTerms();
-            console.debug("1 ", this.state.terms);
             const state = {...this.state};
             state.terms = terms;
             this.setState(state);
-            console.debug("2 ", this.state.terms);
-            console.debug("2 termes", terms);
 
         } catch (error) {
             console.error(`Erreur attrapée dans componentDidMount de Table à l'appel de getTerms ` + error);
@@ -207,7 +204,6 @@ class Table extends Component {
 
     handleSubmitAddOrEditCard = (event, editedCard = false, new_term = null) => {
         console.log("dans handleSubmitAddOrEditCard - card modifiée = ", editedCard);
-        console.info("editedCard", [new_term.name, this.state.term_name]);
 
         event.preventDefault();
         // récupération des éléments du formulaire
@@ -257,7 +253,7 @@ class Table extends Component {
                 reload_current_term
             );
 
-            //Suppression de la carte dans le state
+            //Suppression de la carte dans le state si on a cliqué sur un terme différent
             if (new_term.name !== this.state.term_name) {
                 const prevState = {...this.state};
                 const columnIndex = prevState.columns.findIndex(column => column.id == editedCard.column);
