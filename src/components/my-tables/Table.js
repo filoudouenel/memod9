@@ -207,7 +207,7 @@ class Table extends Component {
 
     handleSubmitAddOrEditCard = (event, editedCard = false, new_term = null) => {
         console.log("dans handleSubmitAddOrEditCard - card modifiée = ", editedCard);
-        console.info("editedCard", editedCard);
+        console.info("editedCard", [new_term.name, this.state.term_name]);
 
         event.preventDefault();
         // récupération des éléments du formulaire
@@ -245,7 +245,7 @@ class Table extends Component {
             console.log("themeid = ", themeId);
             console.log("columnid = ", editedCard.column); */
 
-            // Supression des espaces en début et en fin de chaîne de caractères
+            // Suppression des espaces en début et en fin de chaîne de caractères
             editedCard.question = editedCard.question.trim();
             editedCard.answer = editedCard.answer.trim();
             Coopernet.createReqEditCard(
@@ -256,11 +256,15 @@ class Table extends Component {
                 this.failedEditCard,
                 reload_current_term
             );
-            const prevState = {...this.state};
-            const columnIndex = prevState.columns.findIndex(column => column.id == editedCard.column);
-            const cardIndex = prevState.columns[columnIndex].cards.findIndex(card => card.id == editedCard.id);
-            prevState.columns[columnIndex].cards.splice(cardIndex,1);
-            this.setState(prevState);
+
+            //Suppression de la carte dans le state
+            if (new_term.name !== this.state.term_name) {
+                const prevState = {...this.state};
+                const columnIndex = prevState.columns.findIndex(column => column.id == editedCard.column);
+                const cardIndex = prevState.columns[columnIndex].cards.findIndex(card => card.id == editedCard.id);
+                prevState.columns[columnIndex].cards.splice(cardIndex, 1);
+                this.setState(prevState);
+            }
 
         }
 
