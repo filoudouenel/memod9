@@ -207,7 +207,6 @@ class Table extends Component {
 
     handleSubmitAddOrEditCard = (event, editedCard = false, new_term = null) => {
         console.log("dans handleSubmitAddOrEditCard - card modifiée = ", editedCard);
-        console.info("editedCard", [new_term.name, this.state.term_name]);
 
         event.preventDefault();
         // récupération des éléments du formulaire
