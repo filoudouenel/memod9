@@ -8,6 +8,15 @@ class Coopernet {
     static oauth = {};
     static payload
 
+    static getClientID = async () => {
+        const response = await fetch(Coopernet.url_server + 'oauth/memo/clientId')
+        if (response.ok){
+            const clientId =  await response.json();
+            console.info(clientId);
+            return clientId;
+        }
+    }
+
     /**
      * @return {Promise<string>} le csrf token
      */
@@ -29,11 +38,12 @@ class Coopernet {
      * True : Prépare pour une demande avec le token de rafraîchissement
      * False : Prépare pour une demande avec username et password
      */
-    static setPayload = refresh => {
+    static setPayload = async refresh => {
         const payload = new FormData();
 
-        payload.append("client_id", "54003bfb-057a-486f-8eb1-8c20a0952e19");
-        payload.append("client_secret", "pkyuRTHr8hy:;O6tTo");
+
+        payload.append("client_id", await Coopernet.getClientID());
+        payload.append("client_secret", "51biba95");
 
         if (refresh) {
             payload.append("grant_type", "refresh_token");
@@ -82,7 +92,7 @@ class Coopernet {
      * @throws {Error} Erreur de statut dans la récupération du token oauth
      */
     static fetchOauth = async (payload) => {
-        this.setPayload(payload);
+        await this.setPayload(payload);
         const response = await fetch(this.url_server + "oauth/token", {
             method: "POST", body: this.payload,
         });
