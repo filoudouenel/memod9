@@ -23,6 +23,8 @@ class App extends Component {
       Coopernet.user.pwd = document.getElementById("edit-pass").value;
 
       await Coopernet.setOAuthToken();
+      // on stocke le token oAuth dans local storage qui le stocke indéfiniment (tant que le cache n'est pas supprimé)
+      // Le sessionStorage n'a pas été utilisé.
       localStorage.setItem('token', JSON.stringify(Coopernet.oauth.refresh_token));
       await Coopernet.isLoggedIn()
 
@@ -56,6 +58,7 @@ class App extends Component {
   componentDidMount = async () => {
     try {
       const redirect = async () => {
+        // Coopernet.getStorage() renvoie vrai un refreshtoken est valide dans le local storage
         if (await Coopernet.getStorage()) {
           const user = await Coopernet.isLoggedIn();
           console.debug(`user dans componentDidMount : `, user);
