@@ -1,3 +1,6 @@
+Memopus 1.0.1 - 2022-10-04
+Class Coopernet static + connexion persistante avec utilisation de oauth + debug affichages 'tous les tableaux'
+
 Memopus 1.0.1 - 2022-08-16
 fichier Coopernet.js modifié pour finir la gestion des traductions. Il reste malheureusement le cas du type de contenu 'carte' qui n'est pas modifiable.
 
