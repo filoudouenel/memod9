@@ -42,6 +42,7 @@ class NestedDropdown extends Component {
           onChangeTerm={this.props.onChangeTerm}
           onDeleteTerm={this.props.onDeleteTerm}
           submenu={false}
+          admin_mode={this.props.admin_mode}
         />
 
         {this.renderSubMenu(this.props.term.children, this.props.index, 1, indexes)}
@@ -84,6 +85,7 @@ class NestedDropdown extends Component {
                   onChangeTerm={this.props.onChangeTerm}
                   onDeleteTerm={this.props.onDeleteTerm}
                   submenu={true}
+                  admin_mode={this.props.admin_mode}
                 />
                 {submenu}
               </li>

@@ -1,25 +1,156 @@
 class Coopernet {
-    constructor() {
-        //this.url_server = "https://coopernet.fr/";
-        this.url_server = (process.env.NODE_ENV == 'development') ? 'http://local.coopernet.my/' : 'https://coopernet.fr/';
-        this.token = "";
-        this.user = {
-            uid: 0,
-            uname: "",
-            upwd: ""
-        };
+
+    static url_server = (process.env.NODE_ENV === 'development') ? 'http://local.coopernet.my/' : 'https://coopernet.fr/';
+    static user = {
+        id: 0, name: "", pwd: ""
+    };
+    static csrf = '';
+    static oauth = {};
+    static payload
+
+    static getClientID = async () => {
+        const response = await fetch(Coopernet.url_server + 'oauth/memo/clientId')
+        if (response.ok){
+            const clientId =  await response.json();
+            console.info(clientId);
+            return clientId;
+        }
     }
-    removeCard = (num_card, login, pwd, callbackSuccess, callbackFailed) => {
-        console.log("dans removeCard - card " + num_card);
+
+    /**
+     * @return {Promise<string>} le csrf token
+     */
+    static getCsrfToken = async () => {
+        console.log(`Dans getCsrfToken`);
+        const response = await fetch(this.url_server + "session/token");
+        if (response.ok) {
+            const token = await response.text();
+            this.csrf = token;
+            return token;
+        } else {
+            throw new Error(`Erreur HTTP lors de la récupération du token CSRF. Statut: ${response.status}`);
+        }
+    };
+
+    /**
+     * Prépare le payload pour la demande d'authentification
+     * @param {boolean} refresh
+     * True : Prépare pour une demande avec le token de rafraîchissement
+     * False : Prépare pour une demande avec username et password
+     */
+    static setPayload = async refresh => {
+        const payload = new FormData();
+
+
+        payload.append("client_id", await Coopernet.getClientID());
+        payload.append("client_secret", "pkyuRTHr8hy:;O6tTo");
+
+        if (refresh) {
+            payload.append("grant_type", "refresh_token");
+            payload.append("refresh_token", Coopernet.oauth.refresh_token);
+
+        } else {
+            payload.append("grant_type", "password");
+            payload.append("username", Coopernet.user.name);
+            payload.append("password", Coopernet.user.pwd);
+        }
+        this.payload = payload;
+    };
+
+    /**
+     * Set le token Oauth
+     * @return {Promise<boolean>} - return false si le status est pas ok SINON return true
+     */
+    static setOAuthToken = async () => {
+
+        if (this.oauth.hasOwnProperty('access_token')) {
+            if (Coopernet.isExpiredOauth()) {
+                console.log('Demande avec refresh_token');
+                return Coopernet.setRefreshToken();
+            } else {
+                console.log('Pas de demande');
+                return true;
+            }
+        } else {
+            console.log('Demande avec ID et Password')
+            return Coopernet.fetchOauth(false);
+        }
+    };
+
+    /**
+     * check si le token a expiré
+     * @return {boolean}
+     */
+    static isExpiredOauth = () => this.oauth.expireAt - Date.now() < 0;
+
+    /**
+     * fetch post pour avoir le Oauth token
+     * @param {boolean} payload
+     * True : Prépare pour une demande avec le token de rafraîchissement
+     * False : Prépare pour une demande avec username et password
+     * @return {Boolean} True si tout se passe bien
+     * @throws {Error} Erreur de statut dans la récupération du token oauth
+     */
+    static fetchOauth = async (payload) => {
+        await this.setPayload(payload);
+        const response = await fetch(this.url_server + "oauth/token", {
+            method: "POST", body: this.payload,
+        });
+
+        console.debug(response);
+
+        if (response.ok) {
+            const token = await response.json();
+            // token est un objet avec plusieurs propriétés dont refresh_token, access_token, expires_in, ...
+            console.log("token : ", token);
+            this.oauth = token;
+            this.oauth.expireAt = Date.now() + token.expires_in * 1000;
+            return true;
+        }
+        throw new Error(`Erreur HTTP lors de la récupération du token OAuth. Statut: ${response.status}`);
+    };
+
+    /**
+     * Set le Oauth token avec le refresh_token
+     * @return {Promise<boolean|undefined>}
+     */
+    static setRefreshToken = async () => this.fetchOauth(true);
+
+    /**
+     * Sert à vérifier si l'utlisateur a déjà été connecté il y a moins de 14 jours à l'aide du localStorage et set les token
+     * SI oui, retourne true
+     * SINON, retourne false
+     * @return {Promise<boolean>}
+     */
+    static getStorage = async () => {
+        const refreshToken = JSON.parse(localStorage.getItem('token')); //Récupère le refresh token dans le local storage
+        if (refreshToken) { //Vérifie si il y en a un, si il y en a pas, return false
+            this.oauth.refresh_token = refreshToken; //Affecte la valeur du token récupéré
+            if (await Coopernet.setRefreshToken()) { //Si la création d'un nouveau token sur coopernet à l'aide du refresh_token du local storage fonctionne :
+                await Coopernet.getCsrfToken();
+                localStorage.setItem('token', JSON.stringify(this.oauth.refresh_token)); //Le refresh_token a été rafraîchi, donc je stock le nouveau
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Appel d'un endpoint de suppression de carte sur le serveur
+     * @param {Number} card_id
+     * @returns Promise
+     */
+    static removeCard = (card_id) => {
+        console.log(`dans removeCard - card_id ${card_id}`);
         // utilisation de fetch
-        fetch(this.url_server + "node/" + num_card + "?_format=hal_json", {
+        return fetch(this.url_server + "node/" + card_id + "?_format=hal_json", {
             // permet d'accepter les cookies ?
             credentials: "same-origin",
             method: "DELETE",
             headers: {
                 "Content-Type": "application/hal+json",
-                "X-CSRF-Token": this.token,
-                Authorization: "Basic " + btoa(login + ":" + pwd) // btoa = encodage en base 64
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
+                "X-CSRF-Token": this.csrf,
             },
             body: JSON.stringify({
                 _links: {
@@ -37,52 +168,50 @@ class Coopernet {
         })
             .then(response => response)
             .then(data => {
-                console.log("data reçues:", data);
                 if (data.status === 204) {
-                    callbackSuccess();
+                    console.log(`OK status 204 de removeCard`);
+                    return data;
                 } else {
-                    callbackFailed();
                     throw new Error("Le status du serveur n'est pas 204", data.status);
                 }
-            })
-            .catch(error => {
-                console.error("Erreur attrapée dans removeCard :", error);
             });
     };
-    removeTerm = (tid, login, pwd, callbackSuccess, callbackFailed) => {
-        console.log("dans removeTerm - term " + tid);
+
+    /**
+     * Appel d'un endpoint de suppression de Term sur le serveur
+     *
+     * @param {Number} tid
+     * @returns Promise
+     */
+    static removeTerm = (tid) => {
+        console.log("dans removeTerm - term ", tid);
         // utilisation de fetch
-        fetch(this.url_server + "taxonomy/term/" + tid + "?_format=hal_json", {
+        return fetch(this.url_server + "taxonomy/term/" + tid + "?_format=hal_json", {
             // permet d'accepter les cookies ?
             credentials: "same-origin",
             method: "DELETE",
             headers: {
                 "Content-Type": "application/hal+json",
-                "X-CSRF-Token": this.token,
-                Authorization: "Basic " + btoa(login + ":" + pwd) // btoa = encodage en base 64
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
+                "X-CSRF-Token": this.csrf,
             }
         })
             .then(response => response)
             .then(data => {
                 console.log("data reçues dans removeTerm:", data);
                 if (data.status === 204) {
-                    callbackSuccess();
+                    return data;
                 } else {
-                    callbackFailed();
                     throw new Error("Le status du serveur n'est pas 204", data.status);
                 }
-            })
-            .catch(error => {
-                console.error("Erreur attrapée dans removeTerm :", error);
             });
     };
+
     /**
      * Méthode qui permet à une card de changer de column
      */
-    createReqEditColumnCard = (
+    static createReqEditColumnCard = (
         num_card,
-        login,
-        pwd,
         new_col_id,
         themeid,
         callbackSuccess,
@@ -99,8 +228,8 @@ class Coopernet {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/hal+json",
-                "X-CSRF-Token": this.token,
-                "Authorization": "Basic " + btoa(login + ":" + pwd) // btoa = encodage en base 64
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
+                "X-CSRF-Token": this.csrf,
             },
             body: JSON.stringify({
                 _links: {
@@ -132,9 +261,12 @@ class Coopernet {
                     throw new Error("Problème de data ", data);
                 }
             })
-            .catch(error => { console.error("Erreur attrapée dans createReqEditColumnCard", error); });
+            .catch(error => {
+                console.error("Erreur attrapée dans createReqEditColumnCard", error);
+            });
     };
-    createReqEditCard = (
+
+    static createReqEditCard = (
         card,
         themeid,
         columnid,
@@ -150,8 +282,8 @@ class Coopernet {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/hal+json",
-                "X-CSRF-Token": this.token,
-                Authorization: "Basic " + btoa(this.user.uname + ":" + this.user.upwd) // btoa = encodage en base 64
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
+                "X-CSRF-Token": this.csrf,
             },
             body: JSON.stringify({
                 _links: {
@@ -212,7 +344,8 @@ class Coopernet {
                 console.error("Erreur attrapée dans createReqEditCard :", error);
             });
     };
-    createReqAddCards = (
+
+    static createReqAddCards = (
         card,
         themeid,
         callbackSuccess,
@@ -222,13 +355,11 @@ class Coopernet {
         // création de la requête
         // utilisation de fetch
         fetch(this.url_server + "node?_format=hal_json", {
-            // permet d'accepter les cookies ?
-            credentials: "same-origin",
             method: "POST",
             headers: {
                 "Content-Type": "application/hal+json",
-                "X-CSRF-Token": this.token,
-                Authorization: "Basic " + btoa(this.user.uname + ":" + this.user.upwd) // btoa = encodage en base 64
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
+                "X-CSRF-Token": this.csrf,
             },
             body: JSON.stringify({
                 _links: {
@@ -275,21 +406,24 @@ class Coopernet {
                 ]
             })
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log("!!!!!!!!!!!!!!!!!!!data reçues dans createReqAddCards: ", data);
-                if (data.hasOwnProperty("created") && data.created[0].value) {
-                    callbackSuccess(themeid, card.id);
-                } else {
-                    callbackFailed("Erreur de login ou de mot de passe");
-                    throw new Error("Problème de donnée : ", data);
-                }
+            .then(response => {
+                return response.json()
+                    .then(data => {
+                        console.debug("!!!!!!!!!!!!!!!!!!!data reçues dans createReqAddCards: ", data);
+                        if (data.hasOwnProperty("created") && data.created[0].value) {
+                            callbackSuccess(themeid, card.id);
+                        } else {
+                            callbackFailed("Erreur de login ou de mot de passe");
+                            throw new Error("Problème de donnée : ", data);
+                        }
+                    })
             })
-            .catch(error => { console.error("Erreur catchée dans createReqAddCard : ", error); });
+            .catch(error => {
+                console.error("Erreur catchée dans createReqAddCard : ", error);
+            });
     };
-    createReqAddOrEditTerm = (
-        login,
-        pwd,
+
+    static createReqAddOrEditTerm = (
         label,
         tid,
         callbackSuccess,
@@ -306,8 +440,8 @@ class Coopernet {
             method: "POST",
             headers: {
                 "Content-Type": "application/hal+json",
-                "X-CSRF-Token": this.token,
-                Authorization: "Basic " + btoa(login + ":" + pwd) // btoa = encodage en base 64
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
+                "X-CSRF-Token": this.csrf,
             },
             body: JSON.stringify({
                 _links: {
@@ -349,166 +483,77 @@ class Coopernet {
             });
     };
 
-    /**
-     * @param  {number} termNumber
-     * @param  {function} callbackSuccess
-     * @param  {function} callbackFailed
-     * @param  {number} depth=-1 Va permettre de savoir s'il faut ou pas recharger
-     * @param  {string} term_name
-     * @param  {number} subterm_size
+
+    /*
+     * Récupère les données structurées sous forme de json imbriqué
+     * @param {Number} term_id 
+     * @returns Promise
      */
-    createReqCards = (
-        termNumber,
-        callbackSuccess,
-        callbackFailed,
-        depth = -1,
-        term_name = "",
-        has_subterm = true,
-        uid = this.user.uid
-    ) => {
-        // création de la requête
-        console.log("?????????????????????????????Dans createReqCards de coopernet. termNumber, uid : ", termNumber, this.user.uid);
-        //console.log("token : ", this.token);
-        const req_cards = new XMLHttpRequest();
-        req_cards.onload = () => {
-            // passage de la requête en paramètre, sinon, c'est this (coopernet qui serait utilisé)
-            this.getCards(req_cards,
-                termNumber,
-                callbackSuccess,
-                callbackFailed,
-                depth,
-                term_name,
-                has_subterm);
-        };
-        // Fait appel au "end-point créé dans le module drupal memo"
-        // Pour régler le problème de cache, j'ai ajouté le paramètre "time" à la
-        // requête get cf : https://drupal.stackexchange.com/questions/222467/drupal-8-caches-rest-api-calls/222482
-        req_cards.open(
-            "GET",
+    static getCards = (term_id) => {
+        return fetch(
             this.url_server +
             "memo/list_cards_term/" +
-            uid +
+            this.user.id +
             "/" +
-            termNumber,
-            true
-        );
-        req_cards.setRequestHeader(
-            "Authorization",
-            "Basic " + btoa(this.user.uname + ":" + this.user.upwd)
-        );
-        req_cards.send(null);
-    };
-    /**
-     * @param  {XMLHttpRequest} req
-     * @param  {number} termNumber
-     * @param  {function} callbackSuccess
-     * @param  {function} callbackFailed
-     * @param  {number} depth
-     * @param  {string} term_name
-     * @param  {number} subterm_size
-     */
-    getCards = (req,
-        termNumber,
-        callbackSuccess,
-        callbackFailed,
-        depth,
-        term_name,
-        has_subterm) => {
-        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Dans getCards de coopernet. termNumber : ", termNumber, req.status);
-        // On teste directement le status de notre instance de XMLHttpRequest
-        if (req.status === 200) {
-
-            let jsonResponse = JSON.parse(req.responseText);
-            // ajout de la propriété show_answer à chaque card
-
-            jsonResponse.forEach(function (element) {
-                element.cards.forEach(function (ele) {
-                    ele.show_answer = false;
-                });
+            term_id,
+            {
+                method: "GET", headers: {
+                    "Content-type": "application/json; charset=UTF-8",
+                    "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
+                }
+            }
+        )
+            .then((response) => {
+                if (response.status === 200) return response.json();
+                else throw new Error("Problème de réponse du serveur :  " + response.status);
+            })
+            .then((data) => {
+                console.log("Data dans getCards : ", data);
+                return data;
             });
-            console.log("Récupération des cards ok pour ", term_name);
-            console.log("Ajout prop show_answer to all cards", jsonResponse);
-            callbackSuccess(jsonResponse, termNumber, depth, term_name, has_subterm);
-        } else {
-            // On y est pas encore, voici le statut actuel
-            console.log("Pb getCards - Statut : ", req.status, req.statusText);
-        }
+
     };
-    getUsers = (callbackSuccess, callbackFailed) => {
+
+    static getUsers = async (callbackSuccess, callbackFailed) => {
         // création de la requête
         console.log("Dans getUsers de coopernet.");
-        return fetch(this.url_server + "memo/users/", {
-            // permet d'accepter les cookies ?
-            credentials: "same-origin",
-            method: "GET",
-            headers: {
-                "Content-Type": "application/hal+json",
-                "X-CSRF-Token": this.token,
-                "Authorization": "Basic " + btoa(this.user.uname + ":" + this.user.upwd) // btoa = encodage en base 64
+
+        const response = await fetch(this.url_server + "memo/users/", {
+            method: "GET", headers: {
+                "Content-type": "application/json; charset=UTF-8",
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
             }
         })
-            .then(response => {
-                console.log("data reçues dans getUsers avant json() :", response);
-                if (response.status === 200) return response.json();
-                else throw new Error("Problème de réponse ", response);
-            })
-            .then(data => {
-                console.log("data reçues dans getTerms :", data);
-                if (data) {
-                    // ajout de la propriété "open" à "false" pour tous les termes de
-                    // niveau 1
-                    //data.forEach()
-                    return data;
-                } else {
-                    throw new Error("Problème de data ", data);
-                }
-            })
-            .catch(error => { console.error("Erreur attrapée dans getUsers", error); });
+
+        console.log("data reçues dans getUsers avant json() :", response);
+        if (response.ok) {
+            console.log("data reçues dans getUsers avant json() :", response);
+            const data = await response.json();
+
+            console.log("data reçues dans getTerms :", data);
+            if (data) {
+                // ajout de la propriété "open" à "false" pour tous les termes de
+                // niveau 1
+                //data.forEach()
+                return data;
+            } else throw new Error("Problème de data ", data);
+
+        } else throw new Error("Problème de réponse ", response);
+
     };
-    logUser = (login, pwd) => {
-        console.log(`Dans logUser ;`, login, pwd, this.token);
-        return fetch(this.url_server + "user/login?_format=json", {
-            credentials: "same-origin",
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-Token": this.token
-            },
-            body: JSON.stringify({
-                name: login,
-                pass: pwd
-            })
-        })
-            .then(response => response.json())
-            .then(data => {
-                //console.log("success", data);
-                if (data.current_user === undefined) {
-                    console.log("Erreur de login");
-                    throw new Error("Erreur de data : ", data);
-                } else {
-                    //console.log("user", data.current_user);
-                    this.user.uid = data.current_user.uid;
-                    this.user.uname = data.current_user.name;
-                    this.user.upwd = pwd;
-                }
-            })
-    }
+
     /**
-     * @param  {} callbackSuccess
-     * @param  {} callbackFailed
+     * Récupère les termes d'un utilisateur
+     * @param {Object} user
      */
-    getTerms = (callbackSuccess, callbackFailed, user = this.user) => {
+    static getTerms = (user = this.user) => {
         // création de la requête
         console.log("Dans getTerms de coopernet. User = ", user);
-        fetch(this.url_server + "memo/themes/" +
-            user.uid, {
-            // permet d'accepter les cookies ?
-            credentials: "same-origin",
-            method: "GET",
-            headers: {
-                "Content-Type": "application/hal+json",
-                "X-CSRF-Token": this.token,
-                "Authorization": "Basic " + btoa(this.user.uname + ":" + this.user.upwd) // btoa = encodage en base 64
+        return fetch(this.url_server + "memo/themes/" +
+            user.id, {
+            method: "GET", headers: {
+                "Content-type": "application/json; charset=UTF-8",
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
             }
         })
             .then(response => {
@@ -519,18 +564,12 @@ class Coopernet {
             .then(data => {
                 console.log("data reçues dans getTerms :", data);
                 if (data) {
-                    // ajout de la propriété "open" à "false" pour tous les termes de
-                    // niveau 1
-                    //data.forEach()
-                    callbackSuccess(data, user);
+                    return data;
                 } else {
-                    callbackFailed("Erreur de login ou de mot de passe");
                     throw new Error("Problème de data ", data);
                 }
-            })
-            .catch(error => { console.error("Erreur attrapée dans getTerms", error); });
+            });
     };
-
 
     createReqLogout = () => {
         console.log("Dans createReqLogout de coopernet");
@@ -552,109 +591,28 @@ class Coopernet {
                     //callbackFailed("Erreur de login ou de mot de passe");
                 }
             })
-            .catch(error => { console.error("Erreur attrapée dans createReqLogout", error) });
-    };
-    getToken = () => {
-        console.log(`Dans getToken`);
-        return fetch(`${this.url_server}/session/token/`)
-            .then((response) => {
-                if (response.status !== 200) { // si ça c'est mal passé
-                    throw new Error("Le serveur n'a pas répondu correctement");
-                } else return response.text(); // renvoie une promesse
-            })
-            .then((token) => {
-                this.token = token;
-                return token;
-            });
-    }
-
-    isLoggedIn = () => {
-        console.log("Dans isLoggedIn de Coopernet");
-
-        return fetch(`${this.url_server}/memo/is_logged`)
-            .then(function (response) {
-                if (response.status !== 200) { // si ça c'est mal passé
-                    throw new Error("Le serveur n'a pas répondu correctement");
-                } else return response.json(); // renvoie une promesse
-            })
-            .then(function (user) {
-                //this.token = token;
-                return user;
+            .catch(error => {
+                console.error("Erreur attrapée dans createReqLogout", error)
             });
     };
 
-
-
-    postLogin = req => {
-        console.log("dans postLogin de coopernet");
-        // On teste directement le status de notre instance de XMLHttpRequest
-        if (req.status === 200) {
-            // Tout baigne, voici le contenu de la réponse
-            console.log("login response : ", req.responseText);
-        } else {
-            // On y est pas encore, voici le statut actuel
-            console.log("Pb login - Statut : ", req.status, req.statusText);
-            return "";
-        }
-    };
-
-
-    getIsLogged = (req, callbackSuccess, callbackFailed) => {
-        console.log('Dans getIsLogged de coopernet');
-        // On teste directement le status de notre instance de XMLHttpRequest
-        //console.log("dans getIsLogged de Coopernet");
-        if (req.status === 200) {
-            // Tout baigne, voici le contenu de la réponse
-            console.log("Appel à /memo/is_logged ok");
-            // Construction de l'objet js à partir des données récupérées avec
-            // la fonction JSON.parse
-            let jsonResponse = JSON.parse(req.responseText);
-            if (jsonResponse.user === 0) {
-                console.log("anonymous user");
-                //console.log("User", jsonResponse.user);
-                callbackFailed();
-            } else {
-                //console.log("User", jsonResponse.user);
-                callbackSuccess();
+    static isLoggedIn = async () => {
+        console.debug("Dans isLoggedIn de Coopernet");
+        const response = await fetch(`${this.url_server}/memo/is_logged`, {
+            method: "GET", headers: {
+                "Content-type": "application/json; charset=UTF-8",
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
             }
-            //login(this.responseText);
-        } else if (req.status === 403) {
-            console.log("Statut 403", req.status, req.statusText);
-            this.createReqLogout();
+        })
+        console.debug(response);
+        if (!response.ok) {
+            throw new Error("Le serveur n'a pas répondu correctement");
         } else {
-            // On y est pas encore, voici le statut actuel
-            console.log("Statut d'erreur : ", req.status, req.statusText);
-            callbackFailed();
+            const user = await response.json();
+            Coopernet.user.id = user["user id"];
+            return user["user id"];
         }
-    };
-
-    getTasks = () => {
-        console.log(`dans getTasks`);
-        return fetch(
-            this.url_server + "tasks/list_tasks/",
-            {
-                credentials: "same-origin",
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/hal+json",
-                    "X-CSRF-Token": this.token,
-                    Authorization: "Basic " + btoa(this.uname + ":" + this.upwd), // btoa = encodage en base 64
-                },
-            }
-        )
-            .then((response) => {
-                console.log("data reçues dans getTasks avant json() :", response);
-                if (response.status === 200) return response.json();
-                else throw new Error("Problème de réponse ", response);
-            })
-            .then((data) => {
-                console.log("Data dans getTasks : ", data);
-
-            })
-            .catch((error) => {
-                console.log("Erreur attrapée dans getTasks", error);
-
-            });
     };
 }
+
 export default Coopernet;

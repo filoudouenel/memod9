@@ -33,6 +33,7 @@ class Column extends Component {
               col_index={this.props.col_index}
               card_index={index}
               coopernet={this.props.coopernet}
+              admin_mode={this.props.admin_mode}
             />
           );
         })}

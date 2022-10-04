@@ -32,7 +32,7 @@ class Term extends Component {
       <div className={`d-flex btn m-2 ${classes}`}>
         <a
           href="."
-          className="pr-3"
+          className="pr-3 text-decoration-none"
           onClick={e => {
             e.preventDefault();
             this.props.onClickDropdownToggle(e,
@@ -50,32 +50,35 @@ class Term extends Component {
             dangerouslySetInnerHTML={{ __html: subterm_size }}
           ></span>
         </a>
-        <div className="d-flex">
-          {/* icône des paramètres (engrenage) */}
-          <svg
-            onClick={e => {
-              this.switchOpenParameter();
-            }}
-            className="icon"
-            stroke="currentColor"
-            fill="currentColor"
-            strokeWidth="0"
-            viewBox="0 0 14 16"
-            height="1.5rem"
-            width="1.5rem"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path>
-          </svg>
+        {this.props.admin_mode && (
+          <div className="d-flex">
+            {/* icône des paramètres (engrenage) */}
+            <svg
+              onClick={e => {
+                this.switchOpenParameter();
+              }}
+              className="icon"
+              stroke="currentColor"
+              fill="currentColor"
+              strokeWidth="0"
+              viewBox="0 0 14 16"
+              height="1.5rem"
+              width="1.5rem"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path>
+            </svg>
 
-        </div>
+          </div>
+        )}
       </div>
     );
   };
-  dumpTermModal = (indexes) => {
+  dumpTermModal = (indexes, term, is_term_selected) => {
     //console.log("Dans dumpTermModal. Indexes : ", indexes);
     if (this.state.open_parameter) {
-      const nb_cards = document.querySelectorAll("article.card").length;
+      console.log(`term infos`, term, is_term_selected);
+      const nb_cards = is_term_selected ? document.querySelectorAll("article.card").length : -1;
       return (
         <Modal
           show={this.state.open_parameter}
@@ -94,12 +97,7 @@ class Term extends Component {
           <Modal.Body>
             <div className="parameter-div">
 
-              {(nb_cards > 0) && (
-                <span className="ml-2 alert alert-warning">
-                  suppression impossible tant que des cards sont attachées à ce
-                  terme.
-                </span>
-              )}
+
               <h3>Modification du terme</h3>
               <form
                 id="edit-term"
@@ -129,14 +127,26 @@ class Term extends Component {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <button
+            {(nb_cards > 0) && (
+              <div className="ml-2 mb-4 alert alert-warning">
+                suppression impossible tant que des cartes ({nb_cards}) sont attachées à ce
+                terme.
+              </div>
+            )}
+            {(nb_cards === -1) && (
+              <div className="ml-2 mb-4 alert alert-warning">
+                Vous devez d'abord cliquer sur le terme pour pouvoir éventuellement le supprimer
+              </div>
+            )}
+            {(nb_cards === 0) && (<button
               className="btn btn-danger"
               onClick={e => {
-                this.props.onDeleteTerm(e, this.props.term, nb_cards);
+                this.props.onDeleteTerm(e, this.props.term, nb_cards, indexes);
               }}
             >
               Supprimer
-              </button>
+            </button>)}
+
             <Button variant="primary" onClick={e => this.switchOpenParameter()}>
               Fermer
             </Button>
@@ -168,18 +178,18 @@ class Term extends Component {
           return term.name === this.props.term.name ? (
             ""
           ) : (
-              <li
-                key={term.id}
-                title={`Cliquer pour déplacer la rubrique en cours vers ${term.name}`}
-                className="list-group-item"
-                onClick={e =>
-                  this.props.onChangeTerm(e, this.props.term, term.id, indexes)
-                }
-              >
-                {term.name}
-                {term.hasOwnProperty("children") && this.dumpNestedTermList(term.children, indexes)}
-              </li>
-            );
+            <li
+              key={term.id}
+              title={`Cliquer pour déplacer la rubrique en cours vers ${term.name}`}
+              className="list-group-item"
+              onClick={e =>
+                this.props.onChangeTerm(e, this.props.term, term.id, indexes)
+              }
+            >
+              {term.name}
+              {term.hasOwnProperty("children") && this.dumpNestedTermList(term.children, indexes)}
+            </li>
+          );
         })}
       </ul>
     );
@@ -190,7 +200,7 @@ class Term extends Component {
         <div className="term-div">
 
           {this.dumpTermAsLink(this.props.term.selected, this.props.indexes)}
-          {this.dumpTermModal(this.props.indexes)}
+          {this.dumpTermModal(this.props.indexes, this.props.term, this.props.term.selected)}
         </div>
       </React.Fragment>
     );
