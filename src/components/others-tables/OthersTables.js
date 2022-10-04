@@ -26,11 +26,13 @@ class OthersTables extends Component {
     this.editedColumn = null;
     this.editedCardIndexes = null;
   }
+
   componentDidMount = async () => {
     const users = await Coopernet.getUsers();
     console.log('users dans componentDidMount de OthersTables : ', users);
     const state = { ...this.state };
     state.users = users;
+    console.info(state.users);
 
     // récupération des termes de l'utilisateur
     Coopernet.getTerms();
@@ -105,10 +107,8 @@ class OthersTables extends Component {
     //console.log("Index de la column : " + column_index);
     let card_index = state.columns[column_index].cards.indexOf(card);
     //console.log("Index de la card : " + card_index);
-    state.columns[column_index].cards[card_index].show_answer = state
-      .columns[column_index].cards[card_index].show_answer
-      ? false
-      : true;
+    state.columns[column_index].cards[card_index].show_answer = !state
+        .columns[column_index].cards[card_index].show_answer;
 
     this.setState(state);
   };
@@ -194,12 +194,14 @@ class OthersTables extends Component {
     this.setState(state);
 
   };
-  handleClickName = (e, o_user) => {
+  handleClickName = async (e, o_user) => {
     console.log('dans handleClickName de OthersTables. User : ', o_user);
     o_user.id = o_user.uid;
-    Coopernet.getTerms(o_user);
+    const terms = await Coopernet.getTerms(o_user);
     const state = { ...this.state };
-    state.columns = [];
+    state.terms = terms;
+    state.other_user = o_user;
+    state.show_users = false;
     this.setState(state);
   }
   handleClickHideUsers = (e) => {
@@ -297,7 +299,7 @@ class OthersTables extends Component {
                 label={col.name}
                 cards={col.cards}
                 onShowAnswer={this.changeStateAnswer}
-                user={this.state.coopernet.user}
+                user={Coopernet.user}
                 col_index={index}
                 copied_cards={this.state.copied_cards}
                 onClickEditCard={this.handleClickEditingCard}
@@ -384,19 +386,19 @@ class OthersTables extends Component {
     else state.filter_name = "";
     this.setState(state);
   }
-  handleSubmitFilterByName = (e) => {
+  handleSubmitFilterByName = async (e) => {
     e.preventDefault();
     console.log('Dans handleSubmitFilterByName');
 
     const user_id = document.getElementById("ul-users-button").querySelector("li > button").getAttribute("id");
     const user_index = this.state.users.findIndex(user => {
-      return user.id === user_id;
+      return user.uid === user_id;
     });
     const user = this.state.users[user_index];
     console.log('user_id : ', user_id);
     console.log('user : ', user);
 
-    this.handleClickName(e, user);
+    await this.handleClickName(e, user);
 
   }
   renderUsers = () => {
@@ -447,12 +449,12 @@ class OthersTables extends Component {
               this.state.users
                 .filter(user => {
                   if (this.state.filter_name) return user.uname.match(new RegExp(this.state.filter_name, 'i')) && user.id !== Coopernet.user.id && user.id !== "0"
-                  else return user.id !== Coopernet.user.id && user.id !== "0"
+                  else return user.uid !== Coopernet.user.id && user.uid !== "0"
                 })
                 .map(user => {
                  return <li
-                      onClick={(e) => {
-                        this.handleClickName(e, user)
+                      onClick={async (e) => {
+                        await this.handleClickName(e, user)
                       }}
                       className="col col-md-2 "
                       key={user.uid}>
@@ -515,7 +517,7 @@ class OthersTables extends Component {
           </div>
           <div className="row">
             <div className="col">
-              <h2> {this.state.other_user ? 'Les tableaux de ' + this.state.other_user.name : ''}</h2>
+              <h2> {this.state.other_user ? 'Les tableaux de ' + this.state.other_user.uname : ''}</h2>
             </div>
           </div>
           <div className="row">
