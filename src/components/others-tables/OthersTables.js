@@ -29,9 +29,11 @@ class OthersTables extends Component {
 
   componentDidMount = async () => {
     const users = await Coopernet.getUsers();
+    const terms = await Coopernet.getTerms();
     console.log('users dans componentDidMount de OthersTables : ', users);
     const state = { ...this.state };
     state.users = users;
+    state.my_terms = terms;
 
     // récupération des termes de l'utilisateur
     this.setState(state);
@@ -121,7 +123,7 @@ class OthersTables extends Component {
   handleClickCopyCard = (e, card, term) => {
     e.stopPropagation();
     console.log('Dans handleClickCopyCard - card : ', card, "terme : ", term);
-    this.state.coopernet.createReqAddCards(
+    Coopernet.createReqAddCards(
       card,
       term.id,
       this.successAddCard,
