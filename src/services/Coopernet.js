@@ -42,7 +42,7 @@ class Coopernet {
         const payload = new FormData();
 
         payload.append("client_id", await Coopernet.getClientID());
-        payload.append("client_secret", "51biba95");
+        payload.append("client_secret", "pkyuRTHr8hy:;O6tTo");
 
         if (refresh) {
             payload.append("grant_type", "refresh_token");
