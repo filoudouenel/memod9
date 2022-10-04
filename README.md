@@ -1,10 +1,17 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-## Pour que l'appli fonctionne, il faut d'abord installer plusieurs modules
-npm install react-icons --save  
-npm i bootstrap  
-npm install react-bootstrap bootstrap  
-npm i react-diff-viewer  
-npm install react-router-dom  
+## Pour que l'appli fonctionne :
+
+`npm i`
+
+Mettre le mot de passe pkyuRTHr8hy:;O6tTo dans la fonction setPayload se trouvant dans Service/Coopernet.
+
+## Liste des packages utilisés :
+- react-icons
+- bootstrap
+- react-bootstrap bootstrap
+- react-diff-viewer
+- react-router-dom
+
 
 ## Pour créer une nouvelle Release
 history | grep "git flow" ou regarder sur github "yvandouenel Merge branch 'release/0.1.10'"
