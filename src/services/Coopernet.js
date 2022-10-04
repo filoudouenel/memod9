@@ -489,11 +489,11 @@ class Coopernet {
      * @param {Number} term_id 
      * @returns Promise
      */
-    static getCards = (term_id) => {
+    static getCards = (term_id, user_id = this.user.id) => {
         return fetch(
             this.url_server +
             "memo/list_cards_term/" +
-            this.user.id +
+            user_id +
             "/" +
             term_id,
             {
@@ -568,31 +568,6 @@ class Coopernet {
                 } else {
                     throw new Error("Problème de data ", data);
                 }
-            });
-    };
-
-    createReqLogout = () => {
-        console.log("Dans createReqLogout de coopernet");
-        fetch(this.url_server + "user/logout?_format=hal_json", {
-            // permet d'accepter les cookies ?
-            credentials: "same-origin",
-            method: "GET",
-            headers: {
-                "Content-Type": "application/hal+json",
-                "X-CSRF-Token": this.token
-            }
-        })
-            .then(response => response)
-            .then(data => {
-                console.log("data reçues :", data);
-                if (data) {
-                    //callbackSuccess(themeid);
-                } else {
-                    //callbackFailed("Erreur de login ou de mot de passe");
-                }
-            })
-            .catch(error => {
-                console.error("Erreur attrapée dans createReqLogout", error)
             });
     };
 

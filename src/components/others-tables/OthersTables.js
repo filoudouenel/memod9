@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import React, {Component} from 'react';
+import {Navigate} from 'react-router-dom';
 import NestedDropdown from './NestedDropdown';
 import Column from './Column';
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { FiUserMinus, FiUserPlus } from "react-icons/fi";
+import {FiUserMinus, FiUserPlus} from "react-icons/fi";
 import Coopernet from "../../services/Coopernet";
 
 class OthersTables extends Component {
@@ -32,10 +32,8 @@ class OthersTables extends Component {
     console.log('users dans componentDidMount de OthersTables : ', users);
     const state = { ...this.state };
     state.users = users;
-    console.info(state.users);
 
     // récupération des termes de l'utilisateur
-    Coopernet.getTerms();
     this.setState(state);
   }
   /**
@@ -62,15 +60,14 @@ class OthersTables extends Component {
         // et que le terme est déjà sélectionné, on le déselectionne
         //console.log("Première condition");
         if (depth === 0 &&
-          term.selected &&
-          term.hasOwnProperty("open") &&
-          term.open &&
-          indexes.length === 1) {
+            term.selected &&
+            term.hasOwnProperty("open") &&
+            term.open &&
+            indexes.length === 1) {
           //term.selected = false;
           console.log("Deuxième condition");
           term.open = false;
-        }
-        else {
+        } else {
           //console.log("Troisième condition");
           term.selected = true;
           term.open = true;
@@ -79,8 +76,7 @@ class OthersTables extends Component {
         //console.log("cas où l'index correspond à celui du terme cliqué", term.name);
         term.selected = true;
         term.open = true;
-      }
-      else {
+      } else {
         //console.log("Quatrième condition");
         term.selected = false;
         term.open = false;
@@ -139,60 +135,56 @@ class OthersTables extends Component {
  * @param  {} term_name
  * @param  {boolean} has_subterm
  */
-  handleClickDropdownToggle = (e, term_id, indexes, term_name, has_subterm) => {
-    console.log("ici dans handleClickDropdownToggle");
+  handleClickDropdownToggle = async (e, term_id, indexes, term_name, has_subterm) => {
+    console.log("dans handleClickDropdownToggle");
     console.log("chemin du terme clické : ", indexes);
     console.log("profondeur : ", indexes.length);
     console.log("State des terms : ", this.state.terms);
     console.log("has_subterm : ", has_subterm);
 
     e.preventDefault();
-    const state = { ...this.state };
+    const state = {...this.state};
 
     // si on a cliqué sur un niveau 1 qui était "selected" et "close" alors
     // on ne va pas chercher les cards correspondantes et on se contente
     // de passer le terme de nivau 0 à "open"
     if ((indexes.length === 1) &&
-      state.terms[indexes[0]].selected &&
-      !state.terms[indexes[0]].open) {
+        state.terms[indexes[0]].selected &&
+        !state.terms[indexes[0]].open) {
       // on passe le terme de nivau 0 à "open"
-      console.log("#############################cas 1");
+      console.log("#############################cas 1 - on ouvre une rubrique qui a des sous-rubriques");
       state.terms[indexes[0]].open = true;
+      this.setState(state);
     } else if ((indexes.length === 1) &&
-      state.terms[indexes[0]].open) {
-      console.log("#############################cas 2");
+        state.terms[indexes[0]].open) {
+      console.log("############################# cas 2 on clique sur une rubrique de niveau 1 qui est déjà ouverte");
 
       this.browseTreeToManageSelected(state.terms, indexes);
-      this.state.coopernet.getCards(
-        term_id,
-        this.successGetCards,
-        this.failedCards,
-        indexes.length,
-        term_name
-      );
+      console.log(`Appel de getCards 1`);
       state.terms[indexes[0]].open = false;
+      this.setState(state);
 
-    }
-    else {
-      console.log("#############################cas 3. Term : ",
-        term_name, " - hassubterm : ", has_subterm, "card pour l'utilisateur : ", this.state.other_user);
+    } else {
+      console.log("#############################cas 3. On clique sur un terme pour afficher les cartes correspondantes ",
+          term_name, " - hassubterm : ", has_subterm);
       // on gère l'état des terms (selected, open) grâce à une fonction récursive
       // à laquelle on passe par référence state.terms
       this.browseTreeToManageSelected(state.terms, indexes);
-      /* this.state.coopernet.createReqCards(
-        term_id,
-        this.successGetCards,
-        this.failedCards,
-        indexes.length,
-        term_name,
-        has_subterm,
-        this.state.other_user.id
-      ); */
-      //state.term_name = term_name;
+      try {
+        const columns = await Coopernet.getCards(term_id, this.state.other_user.uid);
+        console.log(`columns : `, columns);
+        state.columns = columns;
+        console.info('PREV', state.columns)
+        state.term_name = term_name;
+        this.themeId = term_id;
+        this.setState(state);
+        console.info('State', this.state.columns)
+        //this.successGetCards(this.state.columns, term_id, 0, term_name, has_subterm);
+      } catch (error) {
+        console.error("Erreur attrapée à l'appel de getCards dans handleClickDropdownToggle", error);
+      }
+
     }
-
-    this.setState(state);
-
   };
   handleClickName = async (e, o_user) => {
     console.log('dans handleClickName de OthersTables. User : ', o_user);
@@ -202,6 +194,7 @@ class OthersTables extends Component {
     state.terms = terms;
     state.other_user = o_user;
     state.show_users = false;
+    state.columns = [];
     this.setState(state);
   }
   handleClickHideUsers = (e) => {
