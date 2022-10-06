@@ -21,7 +21,8 @@ class Table extends Component {
             terms: [],
             columns: [], //ici sont stockées les columns et les cards
             need_get_terms: true,
-            term_name: ""
+            term_name: "",
+            termsAndCols: []
         };
         this.render_modal_add_edit_card = true;
         this.themeId = 0;
@@ -39,8 +40,8 @@ class Table extends Component {
             const terms = await Coopernet.getTerms();
             const state = {...this.state};
             state.terms = terms;
+            state.termsAndCols = await Coopernet.toArrayTermsAndCol();
             this.setState(state);
-
         } catch (error) {
             console.error(`Erreur attrapée dans componentDidMount de Table à l'appel de getTerms ` + error);
         }
@@ -71,8 +72,7 @@ class Table extends Component {
             case "left":
                 // récupération de l'index précédent
                 let previous_column_index = (current_column_index - 1) % 4;
-                previous_column_index =
-                    previous_column_index === -1 ? 3 : previous_column_index;
+                previous_column_index = previous_column_index === -1 ? 3 : previous_column_index;
                 console.log("index précédent : ", previous_column_index);
                 new_index_drupal_column = this.state.columns[previous_column_index].id;
                 break;
@@ -80,13 +80,7 @@ class Table extends Component {
                 console.log("Pb dans moveCard " + direction + ".");
         }
         console.log("nouvel index de la card : ", new_index_drupal_column);
-        Coopernet.createReqEditColumnCard(
-            card.id,
-            new_index_drupal_column,
-            this.themeId,
-            this.successEditColumnCard,
-            this.failedEditColumnCard
-        );
+        Coopernet.createReqEditColumnCard(card.id, new_index_drupal_column, this.themeId, this.successEditColumnCard, this.failedEditColumnCard);
     };
 
     successEditColumnCard = async themeid => {
@@ -136,12 +130,7 @@ class Table extends Component {
         console.log("Dans failedAddCard");
     };
     successAddOrEditTerm = async (tid, action_type) => {
-        console.log(
-            "Dans successAddOrEditTerm - Action : " +
-            action_type +
-            " sur tid : " +
-            tid
-        );
+        console.log("Dans successAddOrEditTerm - Action : " + action_type + " sur tid : " + tid);
         const state = {...this.state};
         state.addingATerm = false;
         this.setState(state);
@@ -201,7 +190,6 @@ class Table extends Component {
 
     }
 
-
     handleSubmitAddOrEditCard = (event, editedCard = false, new_term = null) => {
         console.log("dans handleSubmitAddOrEditCard - card modifiée = ", editedCard);
 
@@ -216,17 +204,10 @@ class Table extends Component {
         }
         // Ajout d'une card si editedCard est faux
         if (!editedCard) {
-            Coopernet.createReqAddCards(
-                new_card,
-                this.themeId,
-                this.successAddCard,
-                this.failedAddCard
-            );
+            Coopernet.createReqAddCards(new_card, this.themeId, this.successAddCard, this.failedAddCard);
         } else {
             // Modification de la card si editedCard est une card
-            console.log(
-                "dans handleSubmitAddOrEditCard : appel de createReqEditCard"
-            );
+            console.log("dans handleSubmitAddOrEditCard : appel de createReqEditCard");
             // Permet de gérer le changement de Terme d'une Card
             const themeId = (new_term) ? new_term.id : this.themeId;
             const reload_current_term = !!new_term;
@@ -244,14 +225,7 @@ class Table extends Component {
             // Suppression des espaces en début et en fin de chaîne de caractères
             editedCard.question = editedCard.question.trim();
             editedCard.answer = editedCard.answer.trim();
-            Coopernet.createReqEditCard(
-                editedCard,
-                themeId,
-                editedCard.column,
-                this.successEditCard,
-                this.failedEditCard,
-                reload_current_term
-            );
+            Coopernet.createReqEditCard(editedCard, themeId, editedCard.column, this.successEditCard, this.failedEditCard, reload_current_term);
 
             //Suppression de la carte dans le state si on a cliqué sur un terme différent
             if (new_term.name !== this.state.term_name) {
@@ -302,15 +276,12 @@ class Table extends Component {
         // si on a cliqué sur un niveau 1 qui était "selected" et "close" alors
         // on ne va pas chercher les cards correspondantes et on se contente
         // de passer le terme de nivau 0 à "open"
-        if ((indexes.length === 1) &&
-            state.terms[indexes[0]].selected &&
-            !state.terms[indexes[0]].open) {
+        if ((indexes.length === 1) && state.terms[indexes[0]].selected && !state.terms[indexes[0]].open) {
             // on passe le terme de nivau 0 à "open"
             console.log("#############################cas 1 - on ouvre une rubrique qui a des sous-rubriques");
             state.terms[indexes[0]].open = true;
             this.setState(state);
-        } else if ((indexes.length === 1) &&
-            state.terms[indexes[0]].open) {
+        } else if ((indexes.length === 1) && state.terms[indexes[0]].open) {
             console.log("############################# cas 2 on clique sur une rubrique de niveau 1 qui est déjà ouverte");
 
             this.browseTreeToManageSelected(state.terms, indexes);
@@ -319,8 +290,7 @@ class Table extends Component {
             this.setState(state);
 
         } else {
-            console.log("#############################cas 3. On clique sur un terme pour afficher les cartes correspondantes ",
-                term_name, " - hassubterm : ", has_subterm);
+            console.log("#############################cas 3. On clique sur un terme pour afficher les cartes correspondantes ", term_name, " - hassubterm : ", has_subterm);
             // on gère l'état des terms (selected, open) grâce à une fonction récursive
             // à laquelle on passe par référence state.terms
             this.browseTreeToManageSelected(state.terms, indexes);
@@ -346,8 +316,7 @@ class Table extends Component {
      * @param  {boolean} has_subterm
      */
     successGetCards = (cols, termId, depth, term_name, has_subterm) => {
-        console.log("Dans successGetCards pour le term : ",
-            term_name, " has_subterm : ", has_subterm, "columns : ", cols);
+        console.log("Dans successGetCards pour le term : ", term_name, " has_subterm : ", has_subterm, "columns : ", cols);
         // Des cards sont-elles liées à cette thématique
         let term_has_cards = false;
         for (let i = 0; i < cols.length; i++) {
@@ -360,8 +329,7 @@ class Table extends Component {
         // ou si le term cliqué est de niveau 0 et avec cards
         // alors on change la rubrique
         console.log("################ - depth - term_has_cards - term_name", depth, term_has_cards, term_name);
-        if ((!(depth === 1 && !term_has_cards && has_subterm)) ||
-            (depth === 1 && term_has_cards)) {
+        if ((!(depth === 1 && !term_has_cards && has_subterm)) || (depth === 1 && term_has_cards)) {
 
             cols.sort((a, b) => a.id - b.id);
             console.log("Columns : ", cols);
@@ -398,11 +366,7 @@ class Table extends Component {
                 // dans le cas où l'on a cliqué sur un term de niveau 0
                 // et que le terme est déjà sélectionné, on le déselectionne
                 //console.log("Première condition");
-                if (depth === 0 &&
-                    term.selected &&
-                    term.hasOwnProperty("open") &&
-                    term.open &&
-                    indexes.length === 1) {
+                if (depth === 0 && term.selected && term.hasOwnProperty("open") && term.open && indexes.length === 1) {
                     //term.selected = false;
                     console.log("Deuxième condition");
                     term.open = false;
@@ -441,129 +405,104 @@ class Table extends Component {
               this.state.editingACard,
               "theme = " + this.themeId
             ); */
-            return (
-                <Modal
-                    show={true}
-                    onHide={this.handleCloseForm}
-                    size="lg"
-                    className="modal-large"
-                >
-                    <Modal.Header className="d-flex justify-content-between">
-                        <Modal.Title>Gérer la card</Modal.Title>
-                        <AiOutlineClose className="icon-click"
-                                        onClick={e => this.handleCloseForm()}
-                        />
-                    </Modal.Header>
-                    <Modal.Body>
-                        {
-                            <>
-                                {/* formulaire ici */}
-                                <h3>Modification de la card</h3>
-                                <form
-                                    id="add-or-edit-card"
-                                    onSubmit={e => {
-                                        this.handleSubmitAddOrEditCard(e, edit);
-                                    }}
-                                >
-                                    <div id="div-question" className="div-label-form">
-                                        <label className="label-large">
-                                            <div>Question :</div>
-                                            {this.state.addingACard && (
-                                                <input
-                                                    type="text"
-                                                    id="inputquestion"
-                                                    autoFocus
-                                                    className="ml-4 input-large"
-                                                />
-                                            )}
-                                            {this.state.editingACard && (
-                                                <input
-                                                    onChange={e =>
-                                                        this.handleChangeCard(e, this.editedCard)
-                                                    }
-                                                    type="text"
-                                                    id="inputquestion"
-                                                    autoFocus
-                                                    className="ml-4 input-large"
-                                                    value={this.editedCard.question}
-                                                />
-                                            )}
-                                        </label>
-                                    </div>
-                                    <div id="div-answer" className="div-label-form">
-                                        <label className="label-large">
-                                            <div>Réponse :</div>
-                                            {this.state.addingACard && (
-                                                <textarea
-                                                    type="text"
-                                                    autoFocus
-                                                    className="ml-4 textarea-large"
-                                                    id="inputanswer"
-                                                />
-                                            )}
-                                            {this.state.editingACard && (
-                                                <textarea
-                                                    onChange={e =>
-                                                        this.handleChangeCard(e, this.editedCard)
-                                                    }
-                                                    type="text"
-                                                    autoFocus
-                                                    className="ml-4 textarea-large"
-                                                    id="inputanswer"
-                                                    value={this.editedCard.answer}
-                                                />
-                                            )}
-                                        </label>
-                                    </div>
-                                    <div id="div-explanation" className="div-label-form">
-                                        <label className="label-large">
-                                            <div>Explication :</div>
-                                            {this.state.addingACard && (
-                                                <textarea
-                                                    type="text"
-                                                    autoFocus
-                                                    className="ml-4 textarea-large"
-                                                    id="inputexplanation"
-                                                />
-                                            )}
-                                            {this.state.editingACard && (
-                                                <textarea
-                                                    onChange={e =>
-                                                        this.handleChangeCard(e, this.editedCard)
-                                                    }
-                                                    type="text"
-                                                    autoFocus
-                                                    className="ml-4 textarea-large"
-                                                    id="inputexplanation"
-                                                    value={this.editedCard.explanation}
-                                                />
-                                            )}
-                                        </label>
-                                    </div>
-                                    <button
-                                        type="submit"
-                                        className="btn btn-default btn-success button-normal-size"
-                                    >
-                                        Envoyer
-                                    </button>
-                                </form>
-                            </>
-                        }
-                        {this.state.editingACard && (this.renderNestedTermList())}
-                    </Modal.Body>
-                    <Modal.Footer>
-                        {(this.editedCard !== null && this.state.editingACard) && (
-                            <Button
-                                variant="warning"
-                                onClick={() => this.removeCard(this.editedCard.id)
-                                }
-                                className="ml-4 bg-danger text-light ">
-                                Supprimer la carte
-                            </Button>
-                        )}
-                    </Modal.Footer>
-                </Modal>
-            );
+            return (<Modal
+                show={true}
+                onHide={this.handleCloseForm}
+                size="lg"
+                className="modal-large"
+            >
+                <Modal.Header className="d-flex justify-content-between">
+                    <Modal.Title>Gérer la card</Modal.Title>
+                    <AiOutlineClose className="icon-click"
+                                    onClick={e => this.handleCloseForm()}
+                    />
+                </Modal.Header>
+                <Modal.Body>
+                    {<>
+                        {/* formulaire ici */}
+                        <h3>Modification de la card</h3>
+                        <form
+                            id="add-or-edit-card"
+                            onSubmit={e => {
+                                this.handleSubmitAddOrEditCard(e, edit);
+                            }}
+                        >
+                            <div id="div-question" className="div-label-form">
+                                <label className="label-large">
+                                    <div>Question :</div>
+                                    {this.state.addingACard && (<input
+                                        type="text"
+                                        id="inputquestion"
+                                        autoFocus
+                                        className="ml-4 input-large"
+                                    />)}
+                                    {this.state.editingACard && (<input
+                                        onChange={e => this.handleChangeCard(e, this.editedCard)}
+                                        type="text"
+                                        id="inputquestion"
+                                        autoFocus
+                                        className="ml-4 input-large"
+                                        value={this.editedCard.question}
+                                    />)}
+                                </label>
+                            </div>
+                            <div id="div-answer" className="div-label-form">
+                                <label className="label-large">
+                                    <div>Réponse :</div>
+                                    {this.state.addingACard && (<textarea
+                                        type="text"
+                                        autoFocus
+                                        className="ml-4 textarea-large"
+                                        id="inputanswer"
+                                    />)}
+                                    {this.state.editingACard && (<textarea
+                                        onChange={e => this.handleChangeCard(e, this.editedCard)}
+                                        type="text"
+                                        autoFocus
+                                        className="ml-4 textarea-large"
+                                        id="inputanswer"
+                                        value={this.editedCard.answer}
+                                    />)}
+                                </label>
+                            </div>
+                            <div id="div-explanation" className="div-label-form">
+                                <label className="label-large">
+                                    <div>Explication :</div>
+                                    {this.state.addingACard && (<textarea
+                                        type="text"
+                                        autoFocus
+                                        className="ml-4 textarea-large"
+                                        id="inputexplanation"
+                                    />)}
+                                    {this.state.editingACard && (<textarea
+                                        onChange={e => this.handleChangeCard(e, this.editedCard)}
+                                        type="text"
+                                        autoFocus
+                                        className="ml-4 textarea-large"
+                                        id="inputexplanation"
+                                        value={this.editedCard.explanation}
+                                    />)}
+                                </label>
+                            </div>
+                            <button
+                                type="submit"
+                                className="btn btn-default btn-success button-normal-size"
+                            >
+                                Envoyer
+                            </button>
+                        </form>
+                    </>}
+                    {this.state.editingACard && (this.renderNestedTermList())}
+                </Modal.Body>
+                <Modal.Footer>
+                    {(this.editedCard !== null && this.state.editingACard) && (<Button
+                        variant="warning"
+                        onClick={() => this.removeCard(this.editedCard.id)}
+                        className="ml-4 bg-danger text-light ">
+                        Supprimer la carte
+                    </Button>)}
+                </Modal.Footer>
+            </Modal>);
         } else return "";
     };
     handleChangeCard = (event, card) => {
@@ -600,13 +539,7 @@ class Table extends Component {
         // on veut placer ce terme en tant que fils de
         if (tid_parent) {
             console.log("le parent du term", term, "sera : ", tid_parent);
-            Coopernet.createReqAddOrEditTerm(
-                term.name,
-                tid,
-                this.successAddOrEditTerm,
-                this.failedAddOrEditTerm,
-                tid_parent
-            );
+            Coopernet.createReqAddOrEditTerm(term.name, tid, this.successAddOrEditTerm, this.failedAddOrEditTerm, tid_parent);
         } else { // on veut simplement modifier ce terme
             // Récupération des champs modifiés via le formulaire
             let term_name = event.target.querySelector("#edit-term-value").value;
@@ -628,20 +561,14 @@ class Table extends Component {
             this.setState(state);
             // Enregistrement si la rubrique n'est ni vide ni un nombre
             if (term_name && isNaN(term_name)) {
-                Coopernet.createReqAddOrEditTerm(
-                    term_name,
-                    tid,
-                    this.successAddOrEditTerm,
-                    this.failedAddOrEditTerm
-                );
+                Coopernet.createReqAddOrEditTerm(term_name, tid, this.successAddOrEditTerm, this.failedAddOrEditTerm);
             }
         }
     };
     handleDeleteTerm = async (event, term, nb_cards, term_indexes) => {
         console.log("Dans handleDeleteTerm, term_indexes: ", term, term_indexes);
 
-        if (nb_cards) console.log("Vous devez d'abord effacer toutes les cards : ", nb_cards);
-        else if (window.confirm('Etes vous sûr.e de vouloir supprimer ce terme ?')) {
+        if (nb_cards) console.log("Vous devez d'abord effacer toutes les cards : ", nb_cards); else if (window.confirm('Etes vous sûr.e de vouloir supprimer ce terme ?')) {
             try {
                 await Coopernet.removeTerm(term.id);
                 // on supprime le terme en question dans l'interface puisque la suppression sur le serveur a fonctionné
@@ -702,12 +629,7 @@ class Table extends Component {
             console.log("input du term non vide et pas un nombre");
 
             // ATTENTION : ici on ne crée pas vraiment un terme mais on en ajoute un sur le serveur et on rafraîchit...
-            Coopernet.createReqAddOrEditTerm(
-                term_label,
-                tid,
-                this.successAddOrEditTerm,
-                this.failedAddOrEditTerm
-            );
+            Coopernet.createReqAddOrEditTerm(term_label, tid, this.successAddOrEditTerm, this.failedAddOrEditTerm);
         } else {
             console.log("input du term vide ou nombre");
             const state = {...this.state};
@@ -718,63 +640,55 @@ class Table extends Component {
     renderFormLogin = () => {
         //console.log("Dans formLogin");
         if (!this.state.userIsLogged) {
-            return (
-                <form id="login-form" onSubmit={this.handleSubmit}>
-                    <label className="mr-4 label-login-form">
-                        <div>login :</div>
-                        <input
-                            id="edit-name"
-                            name="name"
-                            type="text"
-                            className="validate ml-2"
-                        />
-                    </label>
-                    <label className="mr-4 label-login-form">
-                        <div>mot de passe :</div>
-                        <input
-                            id="edit-pass"
-                            name="pass"
-                            type="password"
-                            className="validate ml-2"
-                        />
-                    </label>
-                    <button type="submit" className="btn btn-default btn-info">
-                        Sign in
-                    </button>
-                </form>
-            );
+            return (<form id="login-form" onSubmit={this.handleSubmit}>
+                <label className="mr-4 label-login-form">
+                    <div>login :</div>
+                    <input
+                        id="edit-name"
+                        name="name"
+                        type="text"
+                        className="validate ml-2"
+                    />
+                </label>
+                <label className="mr-4 label-login-form">
+                    <div>mot de passe :</div>
+                    <input
+                        id="edit-pass"
+                        name="pass"
+                        type="password"
+                        className="validate ml-2"
+                    />
+                </label>
+                <button type="submit" className="btn btn-default btn-info">
+                    Sign in
+                </button>
+            </form>);
         } else return "";
     };
     renderFormAddOrEditTerm = () => {
         //console.log("Dans renderFormAddOrEditTerm");
         if (this.state.userIsLogged && this.state.addingATerm) {
-            console.log(
-                "this.state.userIsLogged && this.state.addingATerm",
-                this.state.userIsLogged,
-                this.state.addingATerm
-            );
-            return (
-                <form
-                    id="add-term"
-                    onSubmit={this.handleSubmitAddOrEditTerm}
-                    className="d-flex justify-content-center align-items-center flex-wrap"
-                >
-                    <label className="label-login-form d-flex align-items-center ">
-                        <div className="m-2">Nouvelle rubrique :</div>
-                        <input
-                            id="add-term-value"
-                            name="add-term-name"
-                            type="text"
-                            className="validate m-2"
-                            autoFocus
-                        />
-                    </label>
+            console.log("this.state.userIsLogged && this.state.addingATerm", this.state.userIsLogged, this.state.addingATerm);
+            return (<form
+                id="add-term"
+                onSubmit={this.handleSubmitAddOrEditTerm}
+                className="d-flex justify-content-center align-items-center flex-wrap"
+            >
+                <label className="label-login-form d-flex align-items-center ">
+                    <div className="m-2">Nouvelle rubrique :</div>
+                    <input
+                        id="add-term-value"
+                        name="add-term-name"
+                        type="text"
+                        className="validate m-2"
+                        autoFocus
+                    />
+                </label>
 
-                    <button type="submit" className="btn btn-default btn-info m-2 mb-3">
-                        Ajouter
-                    </button>
-                </form>
-            );
+                <button type="submit" className="btn btn-default btn-info m-2 mb-3">
+                    Ajouter
+                </button>
+            </form>);
         } else return "";
     };
     /**
@@ -783,36 +697,32 @@ class Table extends Component {
         //console.log("Dans renderTerms");
         //console.log("this ", this);
         if (this.state.userIsLogged) {
-            return (
-                <section id="section-terms">
-                    <button
-                        id="add-user-term"
-                        className="btn btn-success m-2"
-                        title="Ajouter une thématique"
-                        onClick={e => {
-                            this.changeStateAddingATerm();
-                        }}
-                    >
-                        +
-                    </button>
-                    <nav>
-                        <ul className="ul-nested-dropdown">
-                            {this.state.terms.map((term, index) => (
-                                <NestedDropdown
-                                    key={term.id}
-                                    term={term}
-                                    terms={this.state.terms}
-                                    onClickDropdownToggle={this.handleClickDropdownToggle}
-                                    index={index}
-                                    onChangeTerm={this.handleChangeTerm}
-                                    onDeleteTerm={this.handleDeleteTerm}
-                                    admin_mode={this.props.admin_mode}
-                                />
-                            ))}
-                        </ul>
-                    </nav>
-                </section>
-            );
+            return (<section id="section-terms">
+                <button
+                    id="add-user-term"
+                    className="btn btn-success m-2"
+                    title="Ajouter une thématique"
+                    onClick={e => {
+                        this.changeStateAddingATerm();
+                    }}
+                >
+                    +
+                </button>
+                <nav>
+                    <ul className="ul-nested-dropdown">
+                        {this.state.terms.map((term, index) => (<NestedDropdown
+                            key={term.id}
+                            term={term}
+                            terms={this.state.terms}
+                            onClickDropdownToggle={this.handleClickDropdownToggle}
+                            index={index}
+                            onChangeTerm={this.handleChangeTerm}
+                            onDeleteTerm={this.handleDeleteTerm}
+                            admin_mode={this.props.admin_mode}
+                        />))}
+                    </ul>
+                </nav>
+            </section>);
         }
     };
     /**
@@ -824,57 +734,42 @@ class Table extends Component {
         console.log("Card modifiée : ", this.editedCard);
         console.log("Indexes de la card : ", this.editedCardIndexes);
         if (this.editedCard) {
-            return (
-                <>
-                    <hr/>
-                    <h3 className="">Déplacer la card</h3>
-                    <ul className="list-group list-group-terms">
-                        {terms.map(term => {
-                            return term.name === this.editedCard.name ? (
-                                ""
-                            ) : (
-                                <li
-                                    key={term.id}
-                                    title={`Cliquer pour déplacer la card en cours vers la rubrique ${term.name}`}
-                                    className="list-group-item"
-                                    onClick={e =>
-                                        this.handleSubmitAddOrEditCard(e, this.editedCard, term)
-                                    }
-                                >
-                                    {term.name}
-                                    {term.hasOwnProperty("children") &&
-                                        this.renderNestedTermList(term.children, this.editedCardIndexes)
-                                    }
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </>
-            );
+            return (<>
+                <hr/>
+                <h3 className="">Déplacer la card</h3>
+                <ul className="list-group list-group-terms">
+                    {terms.map(term => {
+                        return term.name === this.editedCard.name ? ("") : (<li
+                            key={term.id}
+                            title={`Cliquer pour déplacer la card en cours vers la rubrique ${term.name}`}
+                            className="list-group-item"
+                            onClick={e => this.handleSubmitAddOrEditCard(e, this.editedCard, term)}
+                        >
+                            {term.name}
+                            {term.hasOwnProperty("children") && this.renderNestedTermList(term.children, this.editedCardIndexes)}
+                        </li>);
+                    })}
+                </ul>
+            </>);
         }
 
     }
     renderDropdownButton = (terms_array, menu_class = "not-first") => {
         console.log("dans renderDropdownButton", terms_array);
         const m_class = "coop-menu " + menu_class;
-        return (
-            <ul className={m_class}>
-                {(terms_array.length !== 0) &&
-                    terms_array.map(term => {
-                        let submenu;
-                        if (term.hasOwnProperty("children") && term.children.length > 0) {
-                            //console.log("xxxxxxxxxxxxxxxxx appel récursif : ", term.children);
-                            submenu = this.renderDropdownButton(term.children);
-                        }
-                        return (
-                            <li key={term.id}>
-                                {term.name}
-                                {submenu}
-                            </li>
-                        );
-                    })}
-            </ul>
-        )
+        return (<ul className={m_class}>
+            {(terms_array.length !== 0) && terms_array.map(term => {
+                let submenu;
+                if (term.hasOwnProperty("children") && term.children.length > 0) {
+                    //console.log("xxxxxxxxxxxxxxxxx appel récursif : ", term.children);
+                    submenu = this.renderDropdownButton(term.children);
+                }
+                return (<li key={term.id}>
+                    {term.name}
+                    {submenu}
+                </li>);
+            })}
+        </ul>)
     }
     handleClickEditingCard = (e, card, column, col_index, card_index) => {
         console.log("dans handleClickEditingCard : ", card, column, col_index, card_index);
@@ -903,32 +798,80 @@ class Table extends Component {
     };
     renderColumn = () => {
         if (this.state.columns.length) {
-            return (
-                <section className="row section-cards">
-                    {this.state.columns.map((col, index) => {
-                        return (
-                            <Column
-                                key={col.id}
-                                id={col.id}
-                                column={col}
-                                label={col.name}
-                                cards={col.cards}
-                                onClickAddCard={this.handleClickAddingACard}
-                                onClickEditCard={this.handleClickEditingCard}
-                                onMoveCard={this.moveCard}
-                                onShowAnswer={this.changeStateAnswer}
-                                user={Coopernet.user}
-                                col_index={index}
-                                admin_mode={this.props.admin_mode}
-                            />
-                        );
-                    })}
-                </section>
-            );
+            return (<section className="row section-cards">
+                {this.state.columns.map((col, index) => {
+                    return (<Column
+                        key={col.id}
+                        id={col.id}
+                        column={col}
+                        label={col.name}
+                        cards={col.cards}
+                        onClickAddCard={this.handleClickAddingACard}
+                        onClickEditCard={this.handleClickEditingCard}
+                        onMoveCard={this.moveCard}
+                        onShowAnswer={this.changeStateAnswer}
+                        user={Coopernet.user}
+                        col_index={index}
+                        admin_mode={this.props.admin_mode}
+                    />);
+                })}
+            </section>);
         }
     };
+    renderTableTermsAndCols() {
+        return (<div className={'container'}>
+            <div className={'row'}>
+                <div className={'col-md-8 offset-md-2'}>
+                    <table className={'mt-5 table table-success table-hover table-striped text-center'}>
+                        <thead>
+                        <tr>
+                            <th role={"button"} onClick={this.sortByName}>Thématique</th>
+                            <th role={"button"} onClick={() => this.sortByCol(17)}>À apprendre</th>
+                            <th role={"button"} onClick={() => this.sortByCol(18)}>Je sais un peu</th>
+                            <th role={"button"} onClick={() => this.sortByCol(19)}>Je sais bien</th>
+                            <th role={"button"} onClick={() => this.sortByCol(20)}>Je sais parfaitement</th>
+                        </tr>
+                        </thead>
+                        <tbody>{this.state.termsAndCols.map((termAndCols) => <tr role={'button'} onClick={async () => {
+                            const state = {...this.state};
+                            state.columns = await Coopernet.getCards(termAndCols.card_theme_id);
+                            state.term_name = termAndCols.name;
+                            this.setState(state);
+                        }} key={termAndCols.card_theme_id}>
+                            <td>{this.transformText(termAndCols.name)}</td>
+                            <td>{termAndCols.cols['17']}</td>
+                            <td>{termAndCols.cols['18']}</td>
+                            <td>{termAndCols.cols['19']}</td>
+                            <td>{termAndCols.cols['20']}</td>
+                        </tr>)}</tbody>
+                    </table>
+                </div>
+            </div>
+        </div>)
+    }
+    transformText = string => {
+        return string.replace('&#039;', "'").replace('&#34;', "\"");
+    };
+    sortByName = () => {
+        const state = {...this.state};
+        state.termsAndCols.sort((firstTerm, secondTerm) => {
+            const firstTermName = firstTerm.name.toUpperCase();
+            const secondTermName = secondTerm.name.toUpperCase();
 
-
+            if (firstTermName < secondTermName) {
+                return -1;
+            } else if (firstTermName > secondTermName) {
+                return 1;
+            }
+            return 0;
+        });
+        this.setState(state);
+    }
+    sortByCol = (col_id) => {
+        const state = {...this.state};
+        state.termsAndCols.sort((firstTerm, secondTerm) => secondTerm.cols[col_id] - firstTerm.cols[col_id]);
+        this.setState(state);
+    }
     changeStateAnswer = (e, card, column) => {
         /* console.log("dans changeStateAnswer");
         console.log("Theme : " + this.themeId);
@@ -942,8 +885,7 @@ class Table extends Component {
         //console.log("Index de la column : " + column_index);
         let card_index = state.columns[column_index].cards.indexOf(card);
         //console.log("Index de la card : " + card_index);
-        state.columns[column_index].cards[card_index].show_answer = !state
-            .columns[column_index].cards[card_index].show_answer;
+        state.columns[column_index].cards[card_index].show_answer = !state.columns[column_index].cards[card_index].show_answer;
 
         this.setState(state);
     };
@@ -955,23 +897,18 @@ class Table extends Component {
             return <Navigate to="/"/>;
         }
 
-        return (
-            <div>
-                {!this.state.userIsLogged && (<Navigate to="/"/>)}
-                <div className="container">
-                    {this.state.msgError && (
-                        <div className="alert alert-warning">{this.state.msgError}</div>
-                    )}
-                    {this.renderFormAddOrEditCard()}
-                    {this.renderTerms()}
-                    {this.renderFormAddOrEditTerm()}
-                    {this.state.term_name && (
-                        <h2 className="title-term-name">{this.state.term_name}</h2>
-                    )}
-                    {this.renderColumn()}
-                </div>
+        return (<div>
+            {!this.state.userIsLogged && (<Navigate to="/"/>)}
+            <div className="container">
+                {this.state.msgError && (<div className="alert alert-warning">{this.state.msgError}</div>)}
+                {this.renderFormAddOrEditCard()}
+                {this.renderTerms()}
+                {this.renderFormAddOrEditTerm()}
+                {!this.state.term_name && this.renderTableTermsAndCols()}
+                {this.state.term_name && (<h2 className="title-term-name">{this.state.term_name}</h2>)}
+                {this.renderColumn()}
             </div>
-        );
+        </div>);
     }
 }
 
