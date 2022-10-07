@@ -818,6 +818,7 @@ class Table extends Component {
             </section>);
         }
     };
+
     renderTableTermsAndCols() {
         return (<div className={'container'}>
             <div className={'row'}>
@@ -836,6 +837,7 @@ class Table extends Component {
                             const state = {...this.state};
                             state.columns = await Coopernet.getCards(termAndCols.card_theme_id);
                             state.term_name = termAndCols.name;
+                            this.handleClickHomeTermTable(termAndCols.card_theme_id);
                             this.setState(state);
                         }} key={termAndCols.card_theme_id}>
                             <td>{this.transformText(termAndCols.name)}</td>
@@ -849,6 +851,7 @@ class Table extends Component {
             </div>
         </div>)
     }
+
     transformText = string => {
         return string.replace('&#039;', "'").replace('&#34;', "\"");
     };
@@ -872,6 +875,52 @@ class Table extends Component {
         state.termsAndCols.sort((firstTerm, secondTerm) => secondTerm.cols[col_id] - firstTerm.cols[col_id]);
         this.setState(state);
     }
+
+    /**
+     * Fonction récursive qui modifie la propriété selected des termes enfants et parents
+     * @param term
+     * @param searchedThemeId
+     * @return {boolean}
+     */
+    setSelectedInNestedTerms(term, searchedThemeId) {
+        if (term.id === searchedThemeId) {
+            term.selected = true;
+            term.open = true;
+            return true;
+        }
+
+        const children = Object.hasOwn(term, 'children') ? term.children : [];
+
+        for (const child of children) {
+
+            const isMatch = this.setSelectedInNestedTerms(child, searchedThemeId);
+
+            // isMatch est true dans le cas d'un  parent si l'enfant a renvoyé true
+            if (isMatch) {
+                term.selected = true;
+                term.open = false;
+                return true;
+            }
+        }
+        return false;
+    };
+
+    /**
+     * Boucle sur le tableau des termes du state et appelle la fonction récursive setSelectedInNestedTerms
+     * @param searchedThemeId
+     * @return {boolean}
+     */
+    handleClickHomeTermTable = (searchedThemeId) => {
+        const state = {...this.state};
+
+        for (const term of state.terms) {
+            const isMatch = this.setSelectedInNestedTerms(term, searchedThemeId)
+            if (isMatch) {
+                return true;
+            }
+        }
+    };
+
     changeStateAnswer = (e, card, column) => {
         /* console.log("dans changeStateAnswer");
         console.log("Theme : " + this.themeId);
