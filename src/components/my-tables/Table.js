@@ -823,7 +823,7 @@ class Table extends Component {
         return (<div className={'container'}>
             <div className={'row'}>
                 <div className={'col-md-8 offset-md-2'}>
-                    <table className={'mt-5 table table-success table-hover table-striped text-center'}>
+                    <table className={'mt-5 table table-dark table-hover table-striped text-center'}>
                         <thead>
                         <tr>
                             <th role={"button"} onClick={this.sortByName}>Thématique</th>
