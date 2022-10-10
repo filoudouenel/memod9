@@ -232,7 +232,6 @@ class Coopernet {
      */
     static createReqEditColumnCard = (num_card, new_col_id, themeid, callbackSuccess, callbackFailed) => {
         console.log("Dans createReqEditColumnCard de coopernet");
-        console.log("token : ", this.token);
         // création de la requête
         // utilisation de fetch
 

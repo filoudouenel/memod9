@@ -849,6 +849,7 @@ class Table extends Component {
         term.open = false;
         return false;
     };
+
     /**
      * Boucle sur le tableau des termes du state et appelle la fonction récursive setSelectedInNestedTerms
      * @param searchedThemeId
@@ -870,6 +871,7 @@ class Table extends Component {
         const state = {...this.state};
         state.columns = await Coopernet.getCards(termAndCols.card_theme_id);
         state.term_name = termAndCols.name;
+        this.themeId = termAndCols.card_theme_id;
         this.handleClickHomeTermTable(termAndCols.card_theme_id);
         this.setState(state);
     };
