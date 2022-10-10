@@ -8,8 +8,8 @@ class Coopernet {
     static oauth = {};
     static payload
 
-    static getTermsAndColumns = async () => {
-        const response = await fetch(this.url_server + 'rest/cards?_format=json', {
+    static getTermsAndColumns = async (user_id = null) => {
+        const response = await fetch(this.url_server + 'rest/cards' + (user_id ? '/' + user_id : '') + '?_format=json', {
             method: "GET", headers: {
                 "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
             }
@@ -21,9 +21,9 @@ class Coopernet {
         }
     }
 
-    static toArrayTermsAndCol = async () => {
+    static toArrayTermsAndCol = async (user_id = null) => {
         const sortedTerms = [];
-        const datas = await Coopernet.getTermsAndColumns();
+        const datas = user_id ? await Coopernet.getTermsAndColumns(user_id) : await Coopernet.getTermsAndColumns();
 
         for (let i = 0; i < datas.length - 1; i++) {
             const {name, field_card_theme, field_card_column} = datas[i];
@@ -33,7 +33,6 @@ class Coopernet {
             const index = sortedTerms.findIndex((term) => parseInt(term.card_theme_id) === parseInt(field_card_theme));
             sortedTerms[index].cols[field_card_column]++;
         }
-        sortedTerms.sort((firstTerm, secondTerm) => secondTerm.cols[17] - firstTerm.cols[17]);
         return sortedTerms.filter(term => term.cols["17"] !== 0 || term.cols["18"] !== 0 || term.cols["19"] !== 0 || term.cols["20"] !== 0);
     };
 

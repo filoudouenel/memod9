@@ -6,6 +6,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import {FiUserMinus, FiUserPlus} from "react-icons/fi";
 import Coopernet from "../../services/Coopernet";
+import HomeTableTerms from "../HomeTableTerms";
 
 class OthersTables extends Component {
   constructor(props) {
@@ -499,11 +500,65 @@ class OthersTables extends Component {
       );
     }
   };
+
+  /**
+   * Fonction récursive qui modifie la propriété selected des termes enfants et parents
+   * @param term
+   * @param searchedThemeId
+   * @return {boolean}
+   */
+  setSelectedInNestedTerms(term, searchedThemeId) {
+    if (term.id === searchedThemeId) {
+      term.selected = true;
+      term.open = true;
+      return true;
+    }
+
+    const children = Object.hasOwn(term, 'children') ? term.children : [];
+
+    for (const child of children) {
+
+      const isMatch = this.setSelectedInNestedTerms(child, searchedThemeId);
+
+      // isMatch est true dans le cas d'un  parent si l'enfant a renvoyé true
+      if (isMatch) {
+        term.selected = true;
+        term.open = false;
+        return true;
+      }
+    }
+    return false;
+  };
+  /**
+   * Boucle sur le tableau des termes du state et appelle la fonction récursive setSelectedInNestedTerms
+   * @param searchedThemeId
+   * @return {boolean}
+   */
+  handleClickHomeTermTable = (searchedThemeId) => {
+    const state = {...this.state};
+
+    for (const term of state.terms) {
+      console.info()
+      const isMatch = this.setSelectedInNestedTerms(term, searchedThemeId)
+      if (isMatch) {
+        return true;
+      }
+    }
+
+  };
+  handleClickHomeTableRow = async termAndCols => {
+    const state = {...this.state};
+    state.columns = await Coopernet.getCards(termAndCols.card_theme_id, this.state.other_user.uid);
+    state.term_name = termAndCols.name;
+    this.handleClickHomeTermTable(termAndCols.card_theme_id);
+    this.setState(state);
+  };
+
   render() {
     return (
       <div>
         <main className="container">
-          {!this.state.userIsLogged && (<Navigate to="/" />)}
+          {!this.props.userIsLogged && (<Navigate to="/" />)}
 
           <div className="row">
             <div className="col others-users-div">
@@ -524,7 +579,8 @@ class OthersTables extends Component {
             </div>
           </div><div className="row">
             <div className="col">
-              <div >
+              <div>
+                {parseInt(Coopernet.user.id) === 1 &&!this.state.term_name && this.state.other_user && <HomeTableTerms user_id={this.state.other_user.uid} handleClickHomeTableRow={this.handleClickHomeTableRow}/>}
                 {this.renderColumn()}
               </div>
             </div>
