@@ -131,7 +131,6 @@ class App extends Component {
                                         Se déconnecter
                         </span>
                     </div>
-
                 )}
 
                 {Coopernet.url_server === 'https://coopernet.fr/' ? "" : (<div>{Coopernet.url_server}</div>)}
@@ -162,7 +161,7 @@ class App extends Component {
           </Routes>
         </main>
         <footer>
-          <Navbar />
+          <Navbar userIsLogged={this.state.is_logged_in}/>
         </footer>
       </div>
     );
