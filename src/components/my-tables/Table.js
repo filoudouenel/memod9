@@ -6,6 +6,7 @@ import Button from "react-bootstrap/Button";
 import {Navigate} from "react-router-dom";
 import {AiOutlineClose} from "react-icons/ai";
 import Coopernet from "../../services/Coopernet";
+import HomeTableTerms from "../HomeTableTerms";
 
 class Table extends Component {
     constructor(props) {
@@ -22,7 +23,6 @@ class Table extends Component {
             columns: [], //ici sont stockées les columns et les cards
             need_get_terms: true,
             term_name: "",
-            termsAndCols: []
         };
         this.render_modal_add_edit_card = true;
         this.themeId = 0;
@@ -819,63 +819,6 @@ class Table extends Component {
         }
     };
 
-    renderTableTermsAndCols() {
-        return (<div className={'container'}>
-            <div className={'row'}>
-                <div className={'col-md-8 offset-md-2'}>
-                    <table className={'mt-5 table table-dark table-hover table-striped text-center'}>
-                        <thead>
-                        <tr>
-                            <th role={"button"} onClick={this.sortByName}>Thématique</th>
-                            <th role={"button"} onClick={() => this.sortByCol(17)}>À apprendre</th>
-                            <th role={"button"} onClick={() => this.sortByCol(18)}>Je sais un peu</th>
-                            <th role={"button"} onClick={() => this.sortByCol(19)}>Je sais bien</th>
-                            <th role={"button"} onClick={() => this.sortByCol(20)}>Je sais parfaitement</th>
-                        </tr>
-                        </thead>
-                        <tbody>{this.state.termsAndCols.map((termAndCols) => <tr role={'button'} onClick={async () => {
-                            const state = {...this.state};
-                            state.columns = await Coopernet.getCards(termAndCols.card_theme_id);
-                            state.term_name = termAndCols.name;
-                            this.handleClickHomeTermTable(termAndCols.card_theme_id);
-                            this.setState(state);
-                        }} key={termAndCols.card_theme_id}>
-                            <td>{this.transformText(termAndCols.name)}</td>
-                            <td>{termAndCols.cols['17']}</td>
-                            <td>{termAndCols.cols['18']}</td>
-                            <td>{termAndCols.cols['19']}</td>
-                            <td>{termAndCols.cols['20']}</td>
-                        </tr>)}</tbody>
-                    </table>
-                </div>
-            </div>
-        </div>)
-    }
-
-    transformText = string => {
-        return string.replace('&#039;', "'").replace('&#34;', "\"");
-    };
-    sortByName = () => {
-        const state = {...this.state};
-        state.termsAndCols.sort((firstTerm, secondTerm) => {
-            const firstTermName = firstTerm.name.toUpperCase();
-            const secondTermName = secondTerm.name.toUpperCase();
-
-            if (firstTermName < secondTermName) {
-                return -1;
-            } else if (firstTermName > secondTermName) {
-                return 1;
-            }
-            return 0;
-        });
-        this.setState(state);
-    }
-    sortByCol = (col_id) => {
-        const state = {...this.state};
-        state.termsAndCols.sort((firstTerm, secondTerm) => secondTerm.cols[col_id] - firstTerm.cols[col_id]);
-        this.setState(state);
-    }
-
     /**
      * Fonction récursive qui modifie la propriété selected des termes enfants et parents
      * @param term
@@ -895,16 +838,17 @@ class Table extends Component {
 
             const isMatch = this.setSelectedInNestedTerms(child, searchedThemeId);
 
-            // isMatch est true dans le cas d'un  parent si l'enfant a renvoyé true
+            // isMatch est true dans le cas d'un parent si l'enfant a renvoyé true
             if (isMatch) {
                 term.selected = true;
                 term.open = false;
                 return true;
             }
         }
+        term.selected = false;
+        term.open = false;
         return false;
     };
-
     /**
      * Boucle sur le tableau des termes du state et appelle la fonction récursive setSelectedInNestedTerms
      * @param searchedThemeId
@@ -914,11 +858,20 @@ class Table extends Component {
         const state = {...this.state};
 
         for (const term of state.terms) {
+            console.info()
             const isMatch = this.setSelectedInNestedTerms(term, searchedThemeId)
             if (isMatch) {
                 return true;
             }
         }
+
+    };
+    handleClickHomeTableRow = async termAndCols => {
+        const state = {...this.state};
+        state.columns = await Coopernet.getCards(termAndCols.card_theme_id);
+        state.term_name = termAndCols.name;
+        this.handleClickHomeTermTable(termAndCols.card_theme_id);
+        this.setState(state);
     };
 
     changeStateAnswer = (e, card, column) => {
@@ -953,7 +906,7 @@ class Table extends Component {
                 {this.renderFormAddOrEditCard()}
                 {this.renderTerms()}
                 {this.renderFormAddOrEditTerm()}
-                {!this.state.term_name && this.renderTableTermsAndCols()}
+                {!this.state.term_name && <HomeTableTerms handleClickHomeTableRow={this.handleClickHomeTableRow}/>}
                 {this.state.term_name && (<h2 className="title-term-name">{this.state.term_name}</h2>)}
                 {this.renderColumn()}
             </div>
