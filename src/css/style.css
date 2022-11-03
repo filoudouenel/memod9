@@ -274,6 +274,14 @@ form#edit-term {
       margin-top: -50px;
   }
 }
+@media screen and (max-width: 980px) {
+  .link-logo {
+    position: relative;
+    top: 10px;
+    z-index: 2;
+  }
+}
+
 .local {
   float: right;
   margin-top: -15px;

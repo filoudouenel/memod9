@@ -88,7 +88,7 @@ class App extends Component {
 
               <div className="col d-flex justify-content-center">
                 <h1 id="title-memo" className="text-light">
-                  <Link className="text-light m-2 text-decoration-none" to="/"><GiBrainTentacle className="icon-logo " /> e<span id="m-memo">M</span>o</Link>
+                  <Link className="text-light m-2 text-decoration-none link-logo" to="/"><GiBrainTentacle className="icon-logo " /> e<span id="m-memo">M</span>o</Link>
                 </h1>
               </div>
               
