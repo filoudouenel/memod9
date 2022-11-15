@@ -39,8 +39,7 @@ class Coopernet {
     static getClientID = async () => {
         const response = await fetch(Coopernet.url_server + 'oauth/memo/clientId')
         if (response.ok) {
-            const clientId = await response.json();
-            return clientId;
+            return await response.json();
         }
     }
 
@@ -326,25 +325,15 @@ class Coopernet {
                 "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
                 "X-CSRF-Token": this.csrf,
             }, body: JSON.stringify({
-                _links: {
-                    type: {
-                        href: this.url_server + "rest/type/node/carte"
-                    }
-                }, title: [{
-                    value: card.question
-                }], field_card_question: [{
-                    value: card.question
-                }], field_card_answer: [{
-                    value: card.answer
-                }], field_card_explanation: [{
-                    value: card.explanation
-                }], field_card_column: [{
-                    target_id: card.column, url: "/taxonomy/term/" + card.colonnne
-                }], field_card_theme: [{
-                    target_id: themeid, url: "/taxonomy/term/" + themeid
-                }], type: [{
-                    target_id: "carte"
-                }]
+                _links: {type: {href: this.url_server + "rest/type/node/carte"}},
+                title: [{value: card.question}],
+                field_card_question: [{value: card.question}],
+                field_card_question_picture: [{value: card.question_picture}],
+                field_card_answer: [{value: card.answer}],
+                field_card_explanation: [{value: card.explanation}],
+                field_card_column: [{target_id: card.column, url: "/taxonomy/term/" + card.colonnne}],
+                field_card_theme: [{target_id: themeid, url: "/taxonomy/term/" + themeid}],
+                type: [{target_id: "carte"}]
             })
         })
             .then(response => {
@@ -423,7 +412,7 @@ class Coopernet {
                 if (response.status === 200) return response.json(); else throw new Error("Problème de réponse du serveur :  " + response.status);
             })
             .then((data) => {
-                console.log("Data dans getCards : ", data);
+                console.debug("Data dans getCards : ", data);
                 return data;
             });
 

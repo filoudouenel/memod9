@@ -195,13 +195,16 @@ class Table extends Component {
 
         event.preventDefault();
         // récupération des éléments du formulaire
-
         const new_card = {
             question: document.getElementById("inputquestion").value.trim(),
             answer: document.getElementById("inputanswer").value.trim(),
             explanation: document.getElementById("inputexplanation").value,
+            question_picture: document.getElementById("inputquestionpicture").value,
             column: this.numCol
         }
+
+        console.debug(document.getElementById("inputquestionpicture").value)
+
         // Ajout d'une card si editedCard est faux
         if (!editedCard) {
             Coopernet.createReqAddCards(new_card, this.themeId, this.successAddCard, this.failedAddCard);
@@ -444,6 +447,7 @@ class Table extends Component {
                                         className="ml-4 input-large"
                                         value={this.editedCard.question}
                                     />)}
+                                    <input type="file" id={'inputquestionpicture'} />
                                 </label>
                             </div>
                             <div id="div-answer" className="div-label-form">
