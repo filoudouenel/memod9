@@ -96,12 +96,12 @@ class App extends Component {
             <div className="row">
             <div className="col text-light">
                 {this.state.is_logged_in && (
-                  <nav class="navbar navbar-expand-lg navbar-dark">
-                    <a class="navbar-brand" href="#"></a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                      <span class="navbar-toggler-icon"></span>
+                  <nav className="navbar navbar-expand-lg navbar-dark">
+                    <a className="navbar-brand" href="#"></a>
+                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                      <span className="navbar-toggler-icon"></span>
                     </button>
-                    <div class="collapse navbar-collapse mt-3" id="navbarSupportedContent">
+                    <div className="collapse navbar-collapse mt-3" id="navbarSupportedContent">
 
                       <div className={'d-flex align-items-start m-0'}>
                         <div id="admin-link" className={this.state.admin_mode ? "text-warning d-flex align-items-start gap-1" : "text-white d-flex align-items-start gap-1"}
