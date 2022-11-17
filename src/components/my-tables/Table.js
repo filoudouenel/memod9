@@ -236,7 +236,7 @@ class Table extends Component {
             Coopernet.createReqEditCard(editedCard, themeId, editedCard.column, this.successEditCard, this.failedEditCard, reload_current_term);
 
             //Suppression de la carte dans le state si on a cliqué sur un terme différent
-            if (new_term.name !== this.state.term_name) {
+            if (new_term && new_term.name !== this.state.term_name) {
                 const prevState = {...this.state};
                 const columnIndex = prevState.columns.findIndex(column => column.id == editedCard.column);
                 const cardIndex = prevState.columns[columnIndex].cards.findIndex(card => card.id == editedCard.id);
