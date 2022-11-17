@@ -199,11 +199,16 @@ class Table extends Component {
             question: document.getElementById("inputquestion").value.trim(),
             answer: document.getElementById("inputanswer").value.trim(),
             explanation: document.getElementById("inputexplanation").value,
-            question_picture: document.getElementById("inputquestionpicture").value,
+            question_picture: {
+                data: document.getElementById("inputquestionpicture"),
+                url: document.getElementById("inputquestionpicture").value
+            },
+            explanation_picture: {
+                data: document.getElementById("inputexplanationpicture"),
+                url: document.getElementById("inputexplanationpicture").value
+            },
             column: this.numCol
         }
-
-        console.debug(document.getElementById("inputquestionpicture").value)
 
         // Ajout d'une card si editedCard est faux
         if (!editedCard) {
@@ -486,6 +491,7 @@ class Table extends Component {
                                         id="inputexplanation"
                                         value={this.editedCard.explanation}
                                     />)}
+                                    <input type="file" id={'inputexplanationpicture'} />
                                 </label>
                             </div>
                             <button

@@ -315,20 +315,27 @@ class Coopernet {
             });
     };
 
-    static createReqAddCards = (card, themeid, callbackSuccess, callbackFailed) => {
+    static createReqAddCards = async (card, themeid, callbackSuccess, callbackFailed) => {
+        let question_file = null;
+        let explanation_file = null;
+        if (card.question_picture.url) console.log('question', card.question_picture)
+        if (card.explanation_picture.url) console.log('explanation', card.explanation_picture)
+        if (card.question_picture.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
+        if (card.explanation_picture.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
+
         console.log("Dans createReqAddCards de coopernet");
         // création de la requête
         // utilisation de fetch
-        fetch(this.url_server + "node?_format=hal_json", {
+        const response = await fetch(this.url_server + "node?_format=hal_json", {
             method: "POST", headers: {
                 "Content-Type": "application/hal+json",
                 "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
                 "X-CSRF-Token": this.csrf,
-            }, body: JSON.stringify({
+            },
+            body: JSON.stringify({
                 _links: {type: {href: this.url_server + "rest/type/node/carte"}},
                 title: [{value: card.question}],
                 field_card_question: [{value: card.question}],
-                field_card_question_picture: [{value: card.question_picture}],
                 field_card_answer: [{value: card.answer}],
                 field_card_explanation: [{value: card.explanation}],
                 field_card_column: [{target_id: card.column, url: "/taxonomy/term/" + card.colonnne}],
@@ -336,22 +343,66 @@ class Coopernet {
                 type: [{target_id: "carte"}]
             })
         })
-            .then(response => {
-                return response.json()
-                    .then(data => {
-                        console.debug("!!!!!!!!!!!!!!!!!!!data reçues dans createReqAddCards: ", data);
-                        if (data.hasOwnProperty("created") && data.created[0].value) {
-                            callbackSuccess(themeid, card.id);
-                        } else {
-                            callbackFailed("Erreur de login ou de mot de passe");
-                            throw new Error("Problème de donnée : ", data);
-                        }
-                    })
-            })
-            .catch(error => {
-                console.error("Erreur catchée dans createReqAddCard : ", error);
-            });
+        const data = await response.json();
+
+        console.debug("!!!!!!!!!!!!!!!!!!!data reçues dans createReqAddCards: ", data);
+        if (data.hasOwnProperty("created") && data.created[0].value) {
+            if(question_file) {
+                await Coopernet.addImageToCard(data.uuid[0].value, question_file.data.id, 'question');
+            }
+            if (explanation_file){
+                await Coopernet.addImageToCard(data.uuid[0].value, explanation_file.data.id, 'explanation');
+            }
+            callbackSuccess(themeid, card.id);
+        } else {
+            callbackFailed("Erreur de login ou de mot de passe");
+            throw new Error("Problème de donnée : ", data);
+        }
     };
+
+    static addImageToCard = async (card_uuid, image_uuid, inputType) => {
+        const response = fetch(Coopernet.url_server + 'jsonapi/node/carte/' + card_uuid + '/relationships/field_card_'+ inputType +'_picture', {
+            method: 'PATCH', headers: {
+                'Content-Type': 'application/vnd.api+json',
+                'Accept': 'application/vnd.api+json',
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
+                "X-CSRF-Token": this.csrf,
+            }, body: JSON.stringify({
+                "data": {
+                    "type": "file--file",
+                    "id": image_uuid
+                }
+            })
+        })
+        console.log((await response).status);
+    }
+
+    static postImage = async (image, inputField) => {
+        const infoImage = Coopernet.getFile(image.url);
+        console.debug(image);
+        console.debug(`Image.data`, image.data.files[0])
+        const response = await fetch(Coopernet.url_server + 'jsonapi/node/carte/field_card_' + inputField + '_picture',
+            {
+                method: "POST", headers: {
+                    "Content-Type": 'application/octet-stream',
+                    "Accept": "application/vnd.api+json",
+                    "Content-Disposition": `file; filename="${Math.random().toString(36).replace(/[^a-z]+/g, '')}.${infoImage[1]}"`,
+                    "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
+                    "X-CSRF-Token": this.csrf,
+                }, body: image.data.files[0]
+            })
+        if (response.ok) {
+            return response.json();
+        } else {
+            console.debug('Fichier non envoyé', response.status);
+        }
+    }
+    static getFile = (imageUrl) => {
+        console.debug('imageURL', imageUrl)
+        const path = imageUrl.split('\\');
+        const finalPath = path[path.length - 1];
+        return finalPath.split('.');
+    }
 
     static createReqAddOrEditTerm = (label, tid, callbackSuccess, callbackFailed, ptid = 0) => {
         console.log("Dans createReqAddOrEditTerm de coopernet, envoie du label : ", label);
@@ -398,10 +449,11 @@ class Coopernet {
 
     /*
      * Récupère les données structurées sous forme de json imbriqué
-     * @param {Number} term_id 
+     * @param {Number} term_id
      * @returns Promise
      */
-    static getCards = (term_id, user_id = this.user.id) => {
+    static
+    getCards = (term_id, user_id = this.user.id) => {
         return fetch(this.url_server + "memo/list_cards_term/" + user_id + "/" + term_id, {
             method: "GET", headers: {
                 "Content-type": "application/json; charset=UTF-8",
@@ -418,7 +470,8 @@ class Coopernet {
 
     };
 
-    static getUsers = async (callbackSuccess, callbackFailed) => {
+    static
+    getUsers = async (callbackSuccess, callbackFailed) => {
         // création de la requête
         console.log("Dans getUsers de coopernet.");
 
@@ -450,7 +503,8 @@ class Coopernet {
      * Récupère les termes d'un utilisateur
      * @param {Object} user
      */
-    static getTerms = (user = this.user) => {
+    static
+    getTerms = (user = this.user) => {
         // création de la requête
         console.log("Dans getTerms de coopernet. User = ", user);
         return fetch(this.url_server + "memo/themes/" + user.id, {
@@ -473,7 +527,8 @@ class Coopernet {
             });
     };
 
-    static isLoggedIn = async () => {
+    static
+    isLoggedIn = async () => {
         console.debug("Dans isLoggedIn de Coopernet");
         const response = await fetch(`${this.url_server}/memo/is_logged`, {
             method: "GET", headers: {

@@ -3,7 +3,8 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { IoIosArrowDropright, IoIosArrowDropleft } from "react-icons/io";
 import Diff from "./Diff";
-
+import Coopernet from "../../services/Coopernet";
+import "../../css/image.css"
 class Card extends Component {
   state = {
     suggesting_a_answer: false,
@@ -138,15 +139,18 @@ class Card extends Component {
           />
         </div>
         <section>
-          <h4
-            className="card-question"
-            title="Voir la réponse"
-            onClick={e => {
-              this.props.onShowAnswer(e, this.props.card, this.props.column);
-            }}
-          >
-            {this.props.card.question}
-          </h4>
+          <div>
+            <h4
+                className="card-question"
+                title="Voir la réponse"
+                onClick={e => {
+                  this.props.onShowAnswer(e, this.props.card, this.props.column);
+                }}
+            >
+              {this.props.card.question}
+            </h4>
+            {this.props.card.question_picture && <img src={Coopernet.url_server + this.props.card.question_picture} alt="" />}
+          </div>
           <div className="text-center d-flex justify-content-around align-items-center">
             {this.props.card.answer && (
               <button
@@ -193,7 +197,7 @@ class Card extends Component {
                 className="content info-answer mb-4 ml-2"
                 dangerouslySetInnerHTML={{ __html: this.props.card.explanation }}
               ></div>
-
+              {this.props.card.explanation_picture && <img src={Coopernet.url_server + this.props.card.explanation_picture} alt="" />}
             </div>
           )}
           {this.dumpFormAnswerSuggest()}
