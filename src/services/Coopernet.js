@@ -9,6 +9,7 @@ class Coopernet {
     static payload
 
     static getTermsAndColumns = async (user_id = null) => {
+        console.log('getTermsAndColumns');
         const response = await fetch(this.url_server + 'rest/cards' + (user_id ? '/' + user_id : '') + '?_format=json', {
             method: "GET", headers: {
                 "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
@@ -37,6 +38,7 @@ class Coopernet {
     };
 
     static getClientID = async () => {
+        console.log('getClientID');
         const response = await fetch(Coopernet.url_server + 'oauth/memo/clientId')
         if (response.ok) {
             return await response.json();
@@ -118,6 +120,7 @@ class Coopernet {
      * @throws {Error} Erreur de statut dans la récupération du token oauth
      */
     static fetchOauth = async (payload) => {
+        console.log('fetchOauth');
         await this.setPayload(payload);
         const response = await fetch(this.url_server + "oauth/token", {
             method: "POST", body: this.payload,
@@ -269,10 +272,14 @@ class Coopernet {
             });
     };
 
-    static createReqEditCard = (card, themeid, columnid, callbackSuccess, callbackFailed, no_reload) => {
-        console.log("Dans createReqEditCard de coopernet");
+    static createReqEditCard = async (card, themeid, columnid, callbackSuccess, callbackFailed, no_reload) => {
+        console.debug("Dans createReqEditCard de coopernet", card);
+        let question_file = null;
+        let explanation_file = null;
+        if (card.question_picture.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
+        if (card.explanation_picture.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
         // création de la requête avec fetch
-        fetch(this.url_server + "node/" + card.id + "?_format=hal_json", {
+        const response = await fetch(this.url_server + "node/" + card.id + "?_format=hal_json", {
             // permet d'accepter les cookies ?
             credentials: "same-origin", method: "PATCH", headers: {
                 "Content-Type": "application/hal+json",
@@ -300,30 +307,30 @@ class Coopernet {
                 }]
             })
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log("data reçues :", data);
-                if (data) {
-                    callbackSuccess(themeid, no_reload);
-                } else {
-                    callbackFailed("Erreur de login ou de mot de passe");
-                    throw new Error("Problème de donnée", data);
-                }
-            })
-            .catch(error => {
-                console.error("Erreur attrapée dans createReqEditCard :", error);
-            });
+        const data = await response.json();
+        console.info("data reçues :", data);
+        if (data) {
+            if (question_file) {
+                await Coopernet.addImageToCard(data.uuid[0].value, question_file.data.id, 'question');
+            }
+            if (explanation_file) {
+                await Coopernet.addImageToCard(data.uuid[0].value, explanation_file.data.id, 'explanation');
+            }
+            callbackSuccess(themeid, no_reload);
+        } else {
+            callbackFailed("Erreur de login ou de mot de passe");
+            throw new Error("Problème de donnée", data);
+        }
     };
 
     static createReqAddCards = async (card, themeid, callbackSuccess, callbackFailed) => {
+        console.debug("Dans createReqAddCards de coopernet", card);
         let question_file = null;
         let explanation_file = null;
-        if (card.question_picture.url) console.log('question', card.question_picture)
-        if (card.explanation_picture.url) console.log('explanation', card.explanation_picture)
         if (card.question_picture.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
         if (card.explanation_picture.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
-
-        console.log("Dans createReqAddCards de coopernet");
+        console.info('question_file', question_file);
+        console.info('explanation_file', explanation_file);
         // création de la requête
         // utilisation de fetch
         const response = await fetch(this.url_server + "node?_format=hal_json", {
@@ -347,10 +354,10 @@ class Coopernet {
 
         console.debug("!!!!!!!!!!!!!!!!!!!data reçues dans createReqAddCards: ", data);
         if (data.hasOwnProperty("created") && data.created[0].value) {
-            if(question_file) {
+            if (question_file) {
                 await Coopernet.addImageToCard(data.uuid[0].value, question_file.data.id, 'question');
             }
-            if (explanation_file){
+            if (explanation_file) {
                 await Coopernet.addImageToCard(data.uuid[0].value, explanation_file.data.id, 'explanation');
             }
             callbackSuccess(themeid, card.id);
@@ -361,7 +368,8 @@ class Coopernet {
     };
 
     static addImageToCard = async (card_uuid, image_uuid, inputType) => {
-        const response = fetch(Coopernet.url_server + 'jsonapi/node/carte/' + card_uuid + '/relationships/field_card_'+ inputType +'_picture', {
+        console.debug('Dans addImageToCard')
+        const response = fetch(Coopernet.url_server + 'jsonapi/node/carte/' + card_uuid + '/relationships/field_card_' + inputType + '_picture', {
             method: 'PATCH', headers: {
                 'Content-Type': 'application/vnd.api+json',
                 'Accept': 'application/vnd.api+json',
@@ -378,9 +386,8 @@ class Coopernet {
     }
 
     static postImage = async (image, inputField) => {
+        console.debug('Dans postImage')
         const infoImage = Coopernet.getFile(image.url);
-        console.debug(image);
-        console.debug(`Image.data`, image.data.files[0])
         const response = await fetch(Coopernet.url_server + 'jsonapi/node/carte/field_card_' + inputField + '_picture',
             {
                 method: "POST", headers: {
@@ -452,8 +459,8 @@ class Coopernet {
      * @param {Number} term_id
      * @returns Promise
      */
-    static
-    getCards = (term_id, user_id = this.user.id) => {
+    static getCards = (term_id, user_id = this.user.id) => {
+        console.info('getCards')
         return fetch(this.url_server + "memo/list_cards_term/" + user_id + "/" + term_id, {
             method: "GET", headers: {
                 "Content-type": "application/json; charset=UTF-8",

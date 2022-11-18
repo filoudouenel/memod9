@@ -107,6 +107,17 @@ class Table extends Component {
         // le terme en cours. C'est utile dans le cas d'un déplacement de card.
         term_id = (reload_current_term) ? this.themeId : term_id;
 
+        try {
+            const columns = await Coopernet.getCards(term_id);
+            console.log(`columns : `, columns);
+            const state = {...this.state};
+            state.columns = columns;
+            this.themeId = term_id;
+            this.setState(state);
+        } catch (error) {
+            console.error("Erreur attrapée à l'appel de getCards dans handleClickDropdownToggle", error);
+        }
+
     };
 
     failedEditCard = () => {
@@ -233,6 +244,14 @@ class Table extends Component {
             // Suppression des espaces en début et en fin de chaîne de caractères
             editedCard.question = editedCard.question.trim();
             editedCard.answer = editedCard.answer.trim();
+            if (document.getElementById("inputquestionpicture").value) editedCard.question_picture = {
+                data: document.getElementById("inputquestionpicture"),
+                url: document.getElementById("inputquestionpicture").value
+            };
+            if (document.getElementById("inputexplanationpicture").value) editedCard.explanation_picture = {
+                data: document.getElementById("inputexplanationpicture"),
+                url: document.getElementById("inputexplanationpicture").value
+            };
             Coopernet.createReqEditCard(editedCard, themeId, editedCard.column, this.successEditCard, this.failedEditCard, reload_current_term);
 
             //Suppression de la carte dans le state si on a cliqué sur un terme différent
@@ -452,7 +471,7 @@ class Table extends Component {
                                         className="ml-4 input-large"
                                         value={this.editedCard.question}
                                     />)}
-                                    <input type="file" id={'inputquestionpicture'} />
+                                    <input type="file" id={'inputquestionpicture'}/>
                                 </label>
                             </div>
                             <div id="div-answer" className="div-label-form">
@@ -491,7 +510,7 @@ class Table extends Component {
                                         id="inputexplanation"
                                         value={this.editedCard.explanation}
                                     />)}
-                                    <input type="file" id={'inputexplanationpicture'} />
+                                    <input type="file" id={'inputexplanationpicture'}/>
                                 </label>
                             </div>
                             <button
@@ -869,7 +888,6 @@ class Table extends Component {
         const state = {...this.state};
 
         for (const term of state.terms) {
-            console.info()
             const isMatch = this.setSelectedInNestedTerms(term, searchedThemeId)
             if (isMatch) {
                 return true;
