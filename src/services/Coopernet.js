@@ -276,8 +276,8 @@ class Coopernet {
         console.debug("Dans createReqEditCard de coopernet", card);
         let question_file = null;
         let explanation_file = null;
-        if (card.question_picture.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
-        if (card.explanation_picture.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
+        if (card.question_picture && Object.hasOwn(card.question_picture, 'url') && card.question_picture.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
+        if (card.explanation_picture && Object.hasOwn(card.explanation_picture, 'url') && card.explanation_picture.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
         // création de la requête avec fetch
         const response = await fetch(this.url_server + "node/" + card.id + "?_format=hal_json", {
             // permet d'accepter les cookies ?
