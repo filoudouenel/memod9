@@ -244,6 +244,12 @@ class Table extends Component {
             // Suppression des espaces en début et en fin de chaîne de caractères
             editedCard.question = editedCard.question.trim();
             editedCard.answer = editedCard.answer.trim();
+            if(document.getElementById("cbdeleteimagequestion") && document.getElementById("cbdeleteimagequestion").checked){
+                editedCard.question_picture = {delete: document.getElementById("cbdeleteimagequestion").checked}
+            }
+            if(document.getElementById("cbdeleteimageexplanation") && document.getElementById("cbdeleteimageexplanation").checked){
+                editedCard.explanation_picture = {delete: document.getElementById("cbdeleteimageexplanation").checked}
+            }
             if (document.getElementById("inputquestionpicture").value) editedCard.question_picture = {
                 data: document.getElementById("inputquestionpicture"),
                 url: document.getElementById("inputquestionpicture").value
@@ -471,7 +477,18 @@ class Table extends Component {
                                         className="ml-4 input-large"
                                         value={this.editedCard.question}
                                     />)}
-                                    <input type="file" id={'inputquestionpicture'}/>
+                                </label>
+                                <label>
+                                    {this.state.editingACard && this.editedCard.question_picture && (
+                                        <div className='divDeleteImage'>
+                                            <p>Supprimer l'ancienne image ? <img src={Coopernet.url_server + this.editedCard.question_picture}/></p>
+                                            <input className='ms-2' type="checkbox" id="cbdeleteimagequestion"/>
+                                        </div>
+                                    )}
+                                </label>
+                                <label className="mt-2">
+                                    <p>Image question : </p>
+                                    <input className='ms-2' type="file" id={'inputquestionpicture'}/>
                                 </label>
                             </div>
                             <div id="div-answer" className="div-label-form">
@@ -510,7 +527,18 @@ class Table extends Component {
                                         id="inputexplanation"
                                         value={this.editedCard.explanation}
                                     />)}
-                                    <input type="file" id={'inputexplanationpicture'}/>
+                                </label>
+                                <label>
+                                    {this.state.editingACard && this.editedCard.explanation_picture && (
+                                        <div className='divDeleteImage'>
+                                            <p>Supprimer l'ancienne image ? <img src={Coopernet.url_server + this.editedCard.explanation_picture}/></p>
+                                            <input className='ms-2' type="checkbox" id="cbdeleteimageexplanation"/>
+                                        </div>
+                                    )}
+                                </label>
+                                <label className="mt-2">
+                                    <p>Image explication : </p>
+                                    <input className='ms-2' type="file" id={'inputexplanationpicture'}/>
                                 </label>
                             </div>
                             <button

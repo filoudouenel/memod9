@@ -312,9 +312,14 @@ class Coopernet {
         if (data) {
             if (question_file) {
                 await Coopernet.addImageToCard(data.uuid[0].value, question_file.data.id, 'question');
+            } else if (card.question_picture && Object.hasOwn(card.question_picture, 'delete') && card.question_picture.delete) {
+               await Coopernet.deleteImageFromCard(data.uuid[0].value, 'question');
             }
+
             if (explanation_file) {
                 await Coopernet.addImageToCard(data.uuid[0].value, explanation_file.data.id, 'explanation');
+            } else if (card.explanation_picture && Object.hasOwn(card.explanation_picture, 'delete') && card.explanation_picture.delete) {
+                await Coopernet.deleteImageFromCard(data.uuid[0].value, 'explanation');
             }
             callbackSuccess(themeid, no_reload);
         } else {
@@ -329,8 +334,6 @@ class Coopernet {
         let explanation_file = null;
         if (card.question_picture.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
         if (card.explanation_picture.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
-        console.info('question_file', question_file);
-        console.info('explanation_file', explanation_file);
         // création de la requête
         // utilisation de fetch
         const response = await fetch(this.url_server + "node?_format=hal_json", {
@@ -380,6 +383,20 @@ class Coopernet {
                     "type": "file--file",
                     "id": image_uuid
                 }
+            })
+        })
+        console.log((await response).status);
+    }
+    static deleteImageFromCard = async (card_uuid, inputType) => {
+        console.debug('Dans addImageToCard')
+        const response = fetch(Coopernet.url_server + 'jsonapi/node/carte/' + card_uuid + '/relationships/field_card_' + inputType + '_picture', {
+            method: 'PATCH', headers: {
+                'Content-Type': 'application/vnd.api+json',
+                'Accept': 'application/vnd.api+json',
+                "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
+                "X-CSRF-Token": this.csrf,
+            }, body: JSON.stringify({
+                "data": null
             })
         })
         console.log((await response).status);
