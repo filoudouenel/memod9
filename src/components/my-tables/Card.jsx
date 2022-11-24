@@ -149,7 +149,7 @@ class Card extends Component {
             >
               {this.props.card.question}
             </h4>
-            {this.props.card.question_picture && <img src={Coopernet.url_server + this.props.card.question_picture} alt="" />}
+            {this.props.card.question_picture && <a target="_blank" href={Coopernet.url_server + this.props.card.question_picture}><img src={Coopernet.url_server + this.props.card.question_picture} alt="" /></a>}
           </div>
           <div className="text-center d-flex justify-content-around align-items-center">
             {this.props.card.answer && (
@@ -197,7 +197,7 @@ class Card extends Component {
                 className="content info-answer mb-4 ml-2"
                 dangerouslySetInnerHTML={{ __html: this.props.card.explanation }}
               ></div>
-              {this.props.card.explanation_picture && <img src={Coopernet.url_server + this.props.card.explanation_picture} alt="" />}
+              {this.props.card.explanation_picture && <a target="_blank" href={Coopernet.url_server + this.props.card.explanation_picture}><img src={Coopernet.url_server + this.props.card.explanation_picture} alt="" /></a>}
             </div>
           )}
           {this.dumpFormAnswerSuggest()}
