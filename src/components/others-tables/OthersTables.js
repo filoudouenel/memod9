@@ -195,6 +195,7 @@ class OthersTables extends Component {
     const terms = await Coopernet.getTerms(o_user);
     const state = { ...this.state };
     state.terms = terms;
+    state.term_name = '';
     state.other_user = o_user;
     state.show_users = false;
     state.columns = [];
@@ -580,7 +581,7 @@ class OthersTables extends Component {
           </div><div className="row">
             <div className="col">
               <div>
-                {parseInt(Coopernet.user.id) === 1 &&!this.state.term_name && this.state.other_user && <HomeTableTerms user_id={this.state.other_user.uid} handleClickHomeTableRow={this.handleClickHomeTableRow}/>}
+                {!this.state.term_name && this.state.other_user && <HomeTableTerms user_id={this.state.other_user.uid} handleClickHomeTableRow={this.handleClickHomeTableRow}/>}
                 {this.renderColumn()}
               </div>
             </div>

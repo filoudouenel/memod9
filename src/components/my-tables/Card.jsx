@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import {IoIosArrowDropright, IoIosArrowDropleft} from "react-icons/io";
+import {IoIosArrowDropleft, IoIosArrowDropright} from "react-icons/io";
 import Diff from "./Diff";
 import Coopernet from "../../services/Coopernet";
 import "../../css/image.css"
