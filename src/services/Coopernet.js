@@ -332,8 +332,8 @@ class Coopernet {
         console.debug("Dans createReqAddCards de coopernet", card);
         let question_file = null;
         let explanation_file = null;
-        if (card.question_picture.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
-        if (card.explanation_picture.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
+        if (card?.question_picture?.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
+        if (card?.explanation_picture?.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
         // création de la requête
         // utilisation de fetch
         const response = await fetch(this.url_server + "node?_format=hal_json", {
