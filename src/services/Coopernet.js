@@ -158,22 +158,12 @@ class Coopernet {
         console.log(`dans removeCard - card_id ${card_id}`);
         await Coopernet.setOAuthToken();
         // utilisation de fetch
-        return fetch(this.url_server + "node/" + card_id + "?_format=hal_json", {
+        return fetch(this.url_server + "api/card/" + card_id, {
             // permet d'accepter les cookies ?
             credentials: "same-origin", method: "DELETE", headers: {
-                "Content-Type": "application/hal+json",
+                "Content-Type": "application/json",
                 "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
-            }, body: JSON.stringify({
-                _links: {
-                    type: {
-                        href: this.url_server + "rest/type/node/carte"
-                    }
-                },
-
-                type: [{
-                    target_id: "card"
-                }]
-            })
+            }
         })
             .then(response => response)
             .then(data => {
@@ -196,10 +186,10 @@ class Coopernet {
         console.log("dans removeTerm - term ", tid);
         await Coopernet.setOAuthToken();
         // utilisation de fetch
-        return fetch(this.url_server + "taxonomy/term/" + tid + "?_format=hal_json", {
+        return fetch(`${this.url_server}api/term/${tid}`, {
             // permet d'accepter les cookies ?
             credentials: "same-origin", method: "DELETE", headers: {
-                "Content-Type": "application/hal+json",
+                "Content-Type": "application/json",
                 "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
             }
         })
@@ -224,23 +214,13 @@ class Coopernet {
 
         await Coopernet.setOAuthToken();
 
-        fetch(this.url_server + "node/" + num_card + "?_format=hal_json", {
+        fetch(`${this.url_server}api/card/${num_card}/column`, {
             // permet d'accepter les cookies ?
             credentials: "same-origin", method: "PATCH", headers: {
-                "Content-Type": "application/hal+json",
+                "Content-Type": "application/json",
                 "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
             }, body: JSON.stringify({
-                _links: {
-                    type: {
-                        href: this.url_server + "rest/type/node/carte"
-                    }
-                }, field_card_column: [{
-                    target_id: new_col_id, url: "/taxonomy/term/" + new_col_id
-                }],
-
-                type: [{
-                    target_id: "card"
-                }]
+                field_card_column: new_col_id,
             })
         })
             .then(response => response.json())
@@ -267,31 +247,18 @@ class Coopernet {
         if (card.question_picture && Object.hasOwn(card.question_picture, 'url') && card.question_picture.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
         if (card.explanation_picture && Object.hasOwn(card.explanation_picture, 'url') && card.explanation_picture.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
         // création de la requête avec fetch
-        const response = await fetch(this.url_server + "node/" + card.id + "?_format=hal_json", {
+        const response = await fetch(this.url_server + "api/card/" + card.id, {
             // permet d'accepter les cookies ?
             credentials: "same-origin", method: "PATCH", headers: {
-                "Content-Type": "application/hal+json",
+                "Content-Type": "application/json",
                 "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
             }, body: JSON.stringify({
-                _links: {
-                    type: {
-                        href: this.url_server + "rest/type/node/carte"
-                    }
-                }, title: [{
-                    value: card.question
-                }], field_card_question: [{
-                    value: card.question
-                }], field_card_answer: [{
-                    value: card.answer
-                }], field_card_explanation: [{
-                    value: card.explanation
-                }], field_card_column: [{
-                    target_id: columnid, url: "/taxonomy/term/" + columnid
-                }], field_card_theme: [{
-                    target_id: themeid, url: "/taxonomy/term/" + themeid
-                }], type: [{
-                    target_id: "card"
-                }]
+                title: card.question,
+                field_card_question: card.question,
+                field_card_answer: card.answer,
+                field_card_explanation: card.explanation,
+                field_card_column: card.column,
+                field_card_theme: themeid
             })
         })
         const data = await response.json();
@@ -300,7 +267,7 @@ class Coopernet {
             if (question_file) {
                 await Coopernet.addImageToCard(data.uuid[0].value, question_file.data.id, 'question');
             } else if (card.question_picture && Object.hasOwn(card.question_picture, 'delete') && card.question_picture.delete) {
-               await Coopernet.deleteImageFromCard(data.uuid[0].value, 'question');
+                await Coopernet.deleteImageFromCard(data.uuid[0].value, 'question');
             }
 
             if (explanation_file) {
@@ -325,20 +292,18 @@ class Coopernet {
         if (card?.explanation_picture?.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
         // création de la requête
         // utilisation de fetch
-        const response = await fetch(this.url_server + "node?_format=hal_json", {
+        const response = await fetch(this.url_server + "api/add/card", {
             method: "POST", headers: {
-                "Content-Type": "application/hal+json",
+                "Content-Type": "application/json",
                 "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
             },
             body: JSON.stringify({
-                _links: {type: {href: this.url_server + "rest/type/node/carte"}},
-                title: [{value: card.question}],
-                field_card_question: [{value: card.question}],
-                field_card_answer: [{value: card.answer}],
-                field_card_explanation: [{value: card.explanation}],
-                field_card_column: [{target_id: card.column, url: "/taxonomy/term/" + card.colonnne}],
-                field_card_theme: [{target_id: themeid, url: "/taxonomy/term/" + themeid}],
-                type: [{target_id: "carte"}]
+                title: card.question,
+                field_card_question: card.question,
+                field_card_answer: card.answer,
+                field_card_explanation: card.explanation,
+                field_card_column: card.column,
+                field_card_theme: themeid,
             })
         })
         const data = await response.json();
@@ -426,17 +391,13 @@ class Coopernet {
         //console.log("ptid : ", ptid);
         // création de la requête
         // utilisation de fetch
-        fetch(this.url_server + "memo/term?_format=hal_json", {
+        fetch(this.url_server + "memo/term?_format=json", {
             // permet d'accepter les cookies ?
             credentials: "same-origin", method: "POST", headers: {
-                "Content-Type": "application/hal+json",
+                "Content-Type": "application/json",
                 "Authorization": this.oauth.token_type + " " + this.oauth.access_token,
             }, body: JSON.stringify({
-                _links: {
-                    type: {
-                        href: this.url_server + "memo/term"
-                    }
-                }, label: [{
+                label: [{
                     value: label
                 }], tid: [{
                     value: tid
