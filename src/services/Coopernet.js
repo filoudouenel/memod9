@@ -243,9 +243,18 @@ class Coopernet {
         await Coopernet.setOAuthToken();
 
         let question_file = null;
+        /*
+         Si la propriété url existe et qu'elle a une valeur.
+         L'opérateur ?. fonctionne de manière similaire à l'opérateur de chaînage .,
+         à ceci près qu'au lieu de causer une erreur si une référence est null ou undefined,
+         l'expression se court-circuite avec undefined pour valeur de retour.
+         src : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Operators/Optional_chaining
+        */
+        if (card?.question_picture?.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
+
         let explanation_file = null;
-        if (card.question_picture && Object.hasOwn(card.question_picture, 'url') && card.question_picture.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
-        if (card.explanation_picture && Object.hasOwn(card.explanation_picture, 'url') && card.explanation_picture.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
+        if (card?.explanation_picture?.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
+
         // création de la requête avec fetch
         const response = await fetch(this.url_server + "api/card/" + card.id, {
             // permet d'accepter les cookies ?
@@ -282,14 +291,28 @@ class Coopernet {
         }
     };
 
+    /**
+     * Fonction servant à trouver une photo via son id
+     * @param id id de l'image à trouver.
+     * @returns {Promise<any>}
+     */
+    static findImage = async (id) => {
+        const response = await fetch(`${Coopernet.url_server}jsonapi/file/file?filter[drupal_internal__fid]=${id}`)
+        return await response.json();
+    }
+
     static createReqAddCards = async (card, themeid, callbackSuccess, callbackFailed) => {
         console.debug("Dans createReqAddCards de coopernet", card);
         await Coopernet.setOAuthToken();
 
         let question_file = null;
+        // S'il y a un id au champ card.question_picture, c'est qu'on copie une carte sinon s'il y a juste une url, on ajoute une photo
+        if (card?.question_picture?.id) question_file = await Coopernet.findImage(card.question_picture.id);
+        else if (card?.question_picture?.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
+
         let explanation_file = null;
-        if (card?.question_picture?.url) question_file = await Coopernet.postImage(card.question_picture, 'question');
-        if (card?.explanation_picture?.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
+        if (card.explanation_picture?.id) explanation_file = await Coopernet.findImage(card.explanation_picture.id);
+        else if (card?.explanation_picture?.url) explanation_file = await Coopernet.postImage(card.explanation_picture, 'explanation');
         // création de la requête
         // utilisation de fetch
         const response = await fetch(this.url_server + "api/add/card", {
@@ -311,10 +334,13 @@ class Coopernet {
         console.debug("!!!!!!!!!!!!!!!!!!!data reçues dans createReqAddCards: ", data);
         if (data.hasOwnProperty("created") && data.created[0].value) {
             if (question_file) {
-                await Coopernet.addImageToCard(data.uuid[0].value, question_file.data.id, 'question');
+                // Les fonctions findImage et postImage renvoient 2 formats de données différents
+                const imageId = question_file.data?.id ? question_file.data.id : question_file.data[0].id;
+                await Coopernet.addImageToCard(data.uuid[0].value, imageId, 'question');
             }
             if (explanation_file) {
-                await Coopernet.addImageToCard(data.uuid[0].value, explanation_file.data.id, 'explanation');
+                const imageId = explanation_file.data?.id ? explanation_file.data.id : explanation_file.data[0].id;
+                await Coopernet.addImageToCard(data.uuid[0].value, imageId, 'explanation');
             }
             callbackSuccess(themeid, card.id);
         } else {
@@ -324,7 +350,7 @@ class Coopernet {
     };
 
     static addImageToCard = async (card_uuid, image_uuid, inputType) => {
-        console.debug('Dans addImageToCard')
+        console.debug('Dans addImageToCard', image_uuid)
         await Coopernet.setOAuthToken();
 
         const response = fetch(Coopernet.url_server + 'jsonapi/node/carte/' + card_uuid + '/relationships/field_card_' + inputType + '_picture', {

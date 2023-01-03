@@ -172,7 +172,7 @@ class Card extends Component {
                             this.handleClickImg(e)
                         }}
                            target="_blank" href={Coopernet.url_server + this.props.card.question_picture}><img
-                            src={Coopernet.url_server + this.props.card.question_picture} alt=""/>
+                            src={Coopernet.url_server + this.props.card.question_picture.url} alt=""/>
                         </a>
                     }
                     <div className="text-center d-flex justify-content-around align-items-center">
@@ -223,7 +223,7 @@ class Card extends Component {
                                 }}
                                    target="_blank" href={Coopernet.url_server + this.props.card.question_picture}>
                                     <img
-                                        src={Coopernet.url_server + this.props.card.explanation_picture} alt=""/>
+                                        src={Coopernet.url_server + this.props.card.explanation_picture.url} alt=""/>
                                 </a>}
                         </div>
                     )}

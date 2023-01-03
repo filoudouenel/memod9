@@ -170,12 +170,12 @@ class Card extends Component {
                             >
                                 {this.props.card.question}
                             </h4>
-                            {this.props.card.question_picture &&
+                            {this.props.card.question_picture?.url &&
                                 <a onClick={(e) => {
                                     this.handleClickImg(e)
                                 }}
                                    target="_blank" href={Coopernet.url_server + this.props.card.question_picture}><img
-                                    src={Coopernet.url_server + this.props.card.question_picture} alt=""/>
+                                    src={Coopernet.url_server + this.props.card.question_picture.url} alt=""/>
                                 </a>
                             }
                         </div>
@@ -226,13 +226,13 @@ class Card extends Component {
                                     className="content info-answer mb-4 ml-2"
                                     dangerouslySetInnerHTML={{__html: this.props.card.explanation}}
                                 ></div>
-                                {this.props.card.explanation_picture &&
+                                {this.props.card.explanation_picture?.url &&
                                     <a onClick={(e) => {
                                         this.handleClickImg(e)
                                     }}
                                        target="_blank" href={Coopernet.url_server + this.props.card.question_picture}>
                                         <img
-                                            src={Coopernet.url_server + this.props.card.explanation_picture} alt=""/>
+                                            src={Coopernet.url_server + this.props.card.explanation_picture.url} alt=""/>
                                     </a>}
                             </div>
                         )}

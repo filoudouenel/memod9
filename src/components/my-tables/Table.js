@@ -479,9 +479,9 @@ class Table extends Component {
                                     />)}
                                 </label>
                                 <label>
-                                    {this.state.editingACard && this.editedCard.question_picture && (
+                                    {this.state.editingACard && this.editedCard.question_picture?.url && (
                                         <div className='divDeleteImage'>
-                                            <p>Supprimer l'ancienne image ? <img src={Coopernet.url_server + this.editedCard.question_picture}/></p>
+                                            <p>Supprimer l'ancienne image ? <img alt="" src={Coopernet.url_server + this.editedCard.question_picture.url}/></p>
                                             <input className='ms-2' type="checkbox" id="cbdeleteimagequestion"/>
                                         </div>
                                     )}
@@ -529,9 +529,9 @@ class Table extends Component {
                                     />)}
                                 </label>
                                 <label>
-                                    {this.state.editingACard && this.editedCard.explanation_picture && (
+                                    {this.state.editingACard && this.editedCard.explanation_picture?.url && (
                                         <div className='divDeleteImage'>
-                                            <p>Supprimer l'ancienne image ? <img src={Coopernet.url_server + this.editedCard.explanation_picture}/></p>
+                                            <p>Supprimer l'ancienne image ? <img alt="" src={Coopernet.url_server + this.editedCard.explanation_picture.url}/></p>
                                             <input className='ms-2' type="checkbox" id="cbdeleteimageexplanation"/>
                                         </div>
                                     )}
