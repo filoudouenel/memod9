@@ -1,4 +1,7 @@
-Memopus 1.0.1 - 2022-10-04
+Memopus 1.0.3 - 2023-02-09
+No more haljson
+
+Memopus 1.0.2 - 2022-10-04
 Class Coopernet static + connexion persistante avec utilisation de oauth + debug affichages 'tous les tableaux'
 
 Memopus 1.0.1 - 2022-08-16
