@@ -259,6 +259,37 @@ form#edit-term {
   white-space: no-wrap;
 }
 /* Menu déroulant */
+@media screen and (max-width: 980px) {
+  .no-admin #section-terms {
+    display: none;
+  }
+  nav.navbar {
+    position: relative;
+    top: -40px;
+  }
+}
+@media screen and (min-width: 981px) {
+  nav.navbar {
+      float: right;
+      margin-top: -50px;
+  }
+}
+@media screen and (max-width: 980px) {
+  .link-logo {
+    position: relative;
+    top: 10px;
+    z-index: 2;
+  }
+}
+
+.local {
+  float: right;
+  margin-top: -15px;
+}
+#admin-link {
+  flex-basis: 50%;
+}
+
 #section-terms {
   position: relative;
 }

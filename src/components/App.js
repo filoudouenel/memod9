@@ -29,7 +29,7 @@ class App extends Component {
       await Coopernet.isLoggedIn()
 
       this.setState(() => {
-        return { is_logged_in: true,  error_msg: ""};
+        return { is_logged_in: true, error_msg: "" };
       });
     }
     catch (error) {
@@ -79,27 +79,37 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
+      <div className={this.state.admin_mode ? "App admin-mode" : "App no-admin"}>
         <header className="bg-secondary" id="main-header">
 
           <div className='container '>
             <div className="row align-items-center">
-              <div className="col"></div>
+              
 
               <div className="col d-flex justify-content-center">
                 <h1 id="title-memo" className="text-light">
-                  <Link className="text-light m-2" to="/my-tables"><GiBrainTentacle className="icon-logo" /></Link>e<span id="m-memo">M</span>o
+                  <Link className="text-light m-2 text-decoration-none link-logo" to="/"><GiBrainTentacle className="icon-logo " /> e<span id="m-memo">M</span>o</Link>
                 </h1>
               </div>
-              <div className="col text-light">
+              
+            </div>
+            <div className="row">
+            <div className="col text-light">
                 {this.state.is_logged_in && (
-                    <div className={'d-flex'}>
-                      <div className={this.state.admin_mode ? "text-warning d-flex align-items-center gap-1" : "text-white d-flex align-items-center gap-1"}
-                           onClick={e => {
-                             this.handleAdministrationMode();
-                           }}>
-                        {/* icône des paramètres (engrenage) */}
-                        <svg
+                  <nav className="navbar navbar-expand-lg navbar-dark">
+                    <a className="navbar-brand" href="#"></a>
+                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                      <span className="navbar-toggler-icon"></span>
+                    </button>
+                    <div className="collapse navbar-collapse mt-3" id="navbarSupportedContent">
+
+                      <div className={'d-flex align-items-start m-0'}>
+                        <div id="admin-link" className={this.state.admin_mode ? "text-warning d-flex align-items-start gap-1" : "text-white d-flex align-items-start gap-1"}
+                          onClick={e => {
+                            this.handleAdministrationMode();
+                          }}>
+                          {/* icône des paramètres (engrenage) */}
+                          <svg
                             role="button"
                             stroke="currentColor"
                             fill="currentColor"
@@ -108,17 +118,34 @@ class App extends Component {
                             height="1.5rem"
                             width="1.5rem"
                             xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path>
-                        </svg>
-                        {this.state.admin_mode ? <span role="button">Désactiver le mode administration</span> : <span role="button">Activer le mode administration</span>}
+                          >
+                            <path d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path>
+                          </svg>
+                          {this.state.admin_mode ? <span role="button">Désactiver le mode administration</span> : <span role="button">Activer le mode administration</span>}
+                        </div>
+                        <span role={"button"} className={'ms-2 d-flex'} onClick={this.handleClickDisconnect}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            height="1.5rem"
+                            width="1.5rem"
+                            stroke="currentColor"
+                            className="w-6 h-6">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+                            />
+                          </svg>
+                          <span>Se déconnecter</span>
+                        </span>
                       </div>
-                      <button className={'ms-2'} onClick={this.handleClickDisconnect}>Se déconnecter</button>
                     </div>
-
+                  </nav>
                 )}
 
-                {Coopernet.url_server === 'https://coopernet.fr/' ? "" : (<div>{Coopernet.url_server}</div>)}
+                {Coopernet.url_server === 'https://coopernet.fr/' ? "" : (<div className='local'>{Coopernet.url_server}</div>)}
               </div>
             </div>
           </div>
@@ -146,7 +173,7 @@ class App extends Component {
           </Routes>
         </main>
         <footer>
-          <Navbar />
+          <Navbar userIsLogged={this.state.is_logged_in} />
         </footer>
       </div>
     );

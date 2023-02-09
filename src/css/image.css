@@ -1,0 +1,18 @@
+img{
+    width: 100%;
+}
+
+.divDeleteImage{
+    width: 100%;
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+}
+
+#add-or-edit-card .divDeleteImage input{
+    width: 1rem;
+}
+
+p img{
+    width: 100px;
+}
